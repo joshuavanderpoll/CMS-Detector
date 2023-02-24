@@ -361,5 +361,25 @@
                 "value": "bloxServiceIDs.push();"
             }
         ]
+    }, {
+        "name": "Netifly",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "Server",
+                "value": "Netlify"
+            }
+        ]
+    }, {
+        "name": "Odoo",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "<meta name=\"generator\" content=\"Odoo\"/>"
+            }, {
+                "type": "regex",
+                "value": "<script.*id=\"web.layout.odooscript\".*>"
+            }
+        ]
     }
 ]

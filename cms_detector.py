@@ -10,6 +10,18 @@ import binascii
 import readline
 
 
+PURPLE = '\033[95m'
+CYAN = '\033[96m'
+DARKCYAN = '\033[36m'
+BLUE = '\033[94m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+RED = '\033[91m'
+BOLD = '\033[1m'
+UNDERLINE = '\033[4m'
+END = '\033[0m'
+
+
 class CMSDetector:
     def __init__(self, host, raw=False) -> None:
         self.session = requests.session()
@@ -25,24 +37,31 @@ class CMSDetector:
         if os.path.exists("./fingerprints.json"):
             with open("./fingerprints.json", "r") as f:
                 self.fingerprints = json.loads(f.read())
+        else:
+            print(f"{RED}[!] Could not find \"fingerprints.json\".")
+            exit(1)
 
 
     def scan_cms(self):
         if not self.raw:
-            print(f"[@] Scanning host {self.host}...")
+            print(f"{BLUE}[@] Scanning host {DARKCYAN}\"{self.host}\"{BLUE}...")
 
-        response = self.session.get(self.host, headers={
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
-            "Cache-Control": "max-age=0",
-            "sec-ch-ua": "\"Chromium\";v=\"106\", \"Google Chrome\";v=\"106\", \"Not;A=Brand\";v=\"99\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"macOS\"",
-            "sec-fetch-dest": "iframe",
-            "sec-fetch-mode": "navigate",
-            "sec-fetch-site": "same-site",
-            "upgrade-insecure-requests": "1",
-            "referer": self.host
-        }, verify=False)
+        try:
+            response = self.session.get(self.host, headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
+                "Cache-Control": "max-age=0",
+                "sec-ch-ua": "\"Chromium\";v=\"106\", \"Google Chrome\";v=\"106\", \"Not;A=Brand\";v=\"99\"",
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": "\"macOS\"",
+                "sec-fetch-dest": "iframe",
+                "sec-fetch-mode": "navigate",
+                "sec-fetch-site": "same-site",
+                "upgrade-insecure-requests": "1",
+                "referer": self.host
+            }, verify=False)
+        except Exception as e:
+            print(f"{RED}[!] Could not retrieve host. Error: ", e)
+            exit(1)
 
         self.match_response(response)
 
@@ -142,9 +161,9 @@ class CMSDetector:
 
             if match:
                 if not self.raw:
-                    print(f"[√] \"{self.host}\" is using \"{cms['name']}\"!")
+                    print(f"{GREEN}[√] \"{self.host}\" is using {BLUE}\"{cms['name']}\"{GREEN}!")
                 else:
-                    print(str(cms['name']).lower().replace(" ", "_"))
+                    print(GREEN + str(cms['name']).lower().replace(" ", "_"))
                 return
 
         if not self.raw:
@@ -154,15 +173,22 @@ class CMSDetector:
             
 
 if __name__ == "__main__":
+    # Disable SSL warnings
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+    # Arguments
     parser = argparse.ArgumentParser(prog = 'CMS Detector', description = 'What the program does', epilog = 'Created by: https://github.com/joshuavanderpoll')
     parser.add_argument('--host', default=None, type=str)
     parser.add_argument('--raw', default=False, action='store_true', help="Returns only the result (null = No result)")
     args = parser.parse_args()
 
+    # Credits
+    if not args.raw:
+        print(PURPLE + BOLD + "CMS Detector script")
+        print(END + PURPLE + "[•] Made by: https://github.com/joshuavanderpoll/CMS-Detector" + RED)
+
     if args.host == None:
-        args.host = input("[?] Enter host to scan : ")
+        args.host = input(PURPLE + "[?] Enter host to scan : " + END)
 
     if args.host[0:7] != "http://" and args.host[0:8] != "https://":
         args.host = f"http://{args.host}"
