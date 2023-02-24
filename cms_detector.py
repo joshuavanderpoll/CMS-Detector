@@ -5,6 +5,8 @@ import base64
 import urllib.parse
 import urllib3
 import re
+import os
+import binascii
 import readline
 
 
@@ -12,8 +14,17 @@ class CMSDetector:
     def __init__(self, host) -> None:
         self.session = requests.session()
         self.host = host
+        self.fingerprints = []
 
+        self.load_fingerprints()
         self.scan_cms()
+
+
+    def load_fingerprints(self):
+        if os.path.exists("./fingerprints.json"):
+            with open("./fingerprints.json", "r") as f:
+                self.fingerprints = json.loads(f.read())
+
 
     def scan_cms(self):
         print(f"[@] Scanning host {self.host}...")
@@ -29,210 +40,110 @@ class CMSDetector:
             "sec-fetch-site": "same-site",
             "upgrade-insecure-requests": "1",
             "referer": self.host
-        }, verify=False, allow_redirects=True)
+        }, verify=False)
 
-        if self.is_laravel(response):
-            return print("[√] CMS is using Laravel!")
-        elif self.is_wordpress(response):
-            return print("[√] CMS is using WordPress!")
-        elif self.is_drupal(response):
-            return print("[√] CMS is using Drupal!")
-        elif self.is_shopify(response):
-            return print("[√] CMS is using Shopify!")
-        elif self.is_prestashop(response):
-            return print("[√] CMS is using PrestaShop!")
-        elif self.is_squarespace(response):
-            return print("[√] CMS is using SquareSpace!")
-        elif self.is_sanity(response):
-            return print("[√] CMS is using Sanity!")
-        elif self.is_wix(response):
-            return print("[√] CMS is using Wix!")
-        elif self.is_microsoft_asp(response):
-            return print("[√] CMS is using Microsoft ASP!")
-        elif self.is_nextjs(response):
-            return print("[√] CMS is using Next.js!")
-        elif self.is_jouwweb(response):
-            return print("[√] CMS is using JouwWeb!")
-        elif self.is_jouwweb(response):
-            return print("[√] CMS is using JouwWeb!")
-        elif self.is_magento(response):
-            return print("[√] CMS is using Mageno!")
-        elif self.is_weebly(response):
-            return print("[√] CMS is using Weebly!")
-        elif self.is_litespeed(response):
-            return print("[√] CMS is using LiteSpeed!")
-        elif self.is_ruby_on_rails(response):
-            return print("[√] CMS is using Ruby on rails!")
-        elif self.is_joomla(response):
-            return print("[√] CMS is using Joomla!")
-        elif self.is_blogger(response):
-            return print("[√] CMS is using Blogger!")
-        elif self.is_icordis(response):
-            return print("[√] CMS is using Icordis CMS!")
-        elif self.is_silverstripe(response):
-            return print("[√] CMS is using SilverStripe CMS!")
-        elif self.is_sulu(response):
-            return print("[√] CMS is using Sulu CMS!")
+        self.match_response(response)
+
+
+    def match_response(self, response: requests.Response):
+        response_text = response.text.lower().replace("'", "\"").strip()
+
+        for cms in self.fingerprints:
+            match = False
+            for frpr in cms['fingerprints']:
+
+                # Regex match
+                if frpr['type'] == 'regex':
+                    if re.search(frpr['value'], response_text, re.IGNORECASE):
+                        match = True
+                        break
+
+                # Check if body contains string
+                if frpr['type'] == 'string_contains':
+                    if str(frpr['value']).lower() in response_text:
+                        match = True
+                        break
+
+                # Check if body contains string
+                if frpr['type'] == 'strings_contain':
+                    required_values = str(frpr['value']).lower().split("|")
+
+                    if all(substring in response_text for substring in required_values):
+                        match = True
+                        break
+
+                # Check if header key exists
+                if frpr['type'] == 'header_key_equals':
+                    if frpr['value'] in response.headers:
+                        match = True
+                        break
+
+                # Check if header key/value exists
+                if frpr['type'] == 'header_key_value':
+                    if frpr['key'] in response.headers and str(response.headers[frpr['key']]).lower() == str(frpr['value']).lower():
+                        match = True
+                        break
+
+                # Check if header key contains string in value
+                if frpr['type'] == 'header_key_value_contains':
+                    if frpr['key'] in response.headers and str(frpr['value']).lower() in str(response.headers[frpr['key']]).lower():
+                        match = True
+                        break
+
+                # Check if cookie key exists
+                if frpr['type'] == 'cookie_key_equals':
+                    if frpr['value'] in response.cookies:
+                        match = True
+                        break
+
+                # Check if cookie key/value exists
+                if frpr['type'] == 'cookie_key_value':
+                    if frpr['key'] in response.cookies and str(response.cookies[frpr['key']]).lower() == str(frpr['value']).lower():
+                        match = True
+                        break
+
+                # Check if cookie key contains string in value
+                if frpr['type'] == 'cookie_key_value_contains':
+                    if frpr['key'] in response.cookies and str(frpr['value']).lower() in str(response.cookies[frpr['key']]).lower():
+                        match = True
+                        break
+
+                # # Check if cookie key/value its keys after decoding
+                if frpr['type'] == 'cookie_key_value_b64_json_keys':
+                    required_keys = str(frpr['value']).lower().split("|")
+
+                    if frpr['key'] in response.cookies:
+                        try:
+                            url_decoded = urllib.parse.unquote(response.cookies[frpr['key']])
+                            b64_decoded = base64.b64decode(url_decoded)
+                            json_decoded = json.loads(b64_decoded)
+
+                            if all(key in json_decoded for key in required_keys):
+                                match = True
+                                break
+                        except (binascii.Error, json.decoder.JSONDecodeError):
+                            pass
+
+                # Checks end of header key and value type after decoding from Base64
+                if frpr['type'] == 'cookie_substr_key_value_b64_type':
+                    for cookie in response.cookies:
+                        print(cookie.name[frpr['length']:])
+                        if cookie.name[frpr['length']:] == frpr['key']:
+                            try:
+                                url_decoded = urllib.parse.unquote(cookie.value)
+                                b64_decoded = base64.b64decode(url_decoded)
+
+                                if type(b64_decoded).__name__ == frpr['value']:
+                                    match = True
+                                    break
+                            except (binascii.Error):
+                                pass
+
+            if match:
+                print(f"[√] CMS is using {cms['name']}!")
+                return
 
         print("[!] No CMS could be detected.")
-
-
-    def is_laravel(self, response: requests.Response) -> bool:
-        try:
-            xsrf_token = False
-            session_cookie = False
-
-            for cookie in response.cookies:
-                if cookie.name == "XSRF-TOKEN":
-                    xsrf_value = json.loads(base64.b64decode(urllib.parse.unquote(cookie.value)))
-                    if "iv" in xsrf_value and "value" in xsrf_value and "mac" in xsrf_value:
-                        xsrf_token = True
-                if cookie.name[-8:] == "_session":
-                    session_value = base64.b64decode(urllib.parse.unquote(cookie.value))
-                    if type(session_value) == bytes:
-                        session_cookie = True
-
-            return (session_cookie and xsrf_token)
-        except:
-            return False
-
-
-    def is_wordpress(self, response: requests.Response) -> bool:
-        if re.search(r'<meta name="generator" content="WordPress (.+?)" \/>', response.text, re.IGNORECASE):
-            return True
-        if "/wp-content/" in response.text.lower() or "/wp-json/" in response.text.lower() or "/wp-includes/" in response.text.lower():
-            return True
-
-
-    def is_shopify(self, response: requests.Response) -> bool:
-        if "X-Shopify-Stage" in response.headers:
-            return True
-        if "Link" in response.headers and "https://cdn.shopify.com" in response.headers["Link"]:
-            return True
-        if re.search(r'<link rel="preconnect" href="https:\/\/cdn\.shopify\.com".*>', response.text, re.IGNORECASE):
-            return True
-        if "<style data-shopify>" in response.text.lower():
-            return True
-
-
-    def is_drupal(self, response: requests.Response) -> bool:
-        if "X-Generator" in response.headers and "drupal" in response.headers["X-Generator"].lower():
-            return True
-        if "X-Drupal-Cache" in response.headers:
-            return True
-        if re.search(r'<meta name="Generator" content="Drupal (.+?) .*" \/>', response.text, re.IGNORECASE):
-            return True
-        if re.search(r'<script src="\/core\/misc\/drupal\.js\?v=(.+?)"><\/script>', response.text, re.IGNORECASE):
-            return True
-        if re.search(r'<script src="\/core\/misc\/drupal\.init\.js\?v=(.+?)"><\/script>', response.text, re.IGNORECASE):
-            return True
-        if "data-drupal-selector" in response.text.lower() or "data-drupal-form-fields" in response.text.lower() or "data-drupal-link-system-path" in response.text.lower():
-            return True
-
-
-    def is_litespeed(self, response: requests.Response) -> bool:
-        if "Server" in response.headers and "litespeed" in response.headers["Server"].lower():
-            return True
-
-
-    def is_prestashop(self, response: requests.Response) -> bool:
-        if "Powered-By" in response.headers and "prestashop" in response.headers["Powered-By"].lower():
-            return True
-        if "/modules/prestatemplate/" in response.text:
-            return True
-        if "var prestashop = {" in response.text:
-            return True
-        if "<a href=\"https://www.prestashop.com\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">" in response.text:
-            return True
-
-
-    def is_squarespace(self, response: requests.Response) -> bool:
-        if "Server" in response.headers and "squarespace" in response.headers["Server"].lower():
-            return True
-        if "<link rel=\"preconnect\" href=\"https://images.squarespace-cdn.com\">" in response.text.lower():
-            return True
-        if "<!-- this is squarespace. -->" in response.text.lower() or "<!-- end of squarespace headers -->" in response.text.lower():
-            return True
-
-
-    def is_sanity(self, response: requests.Response) -> bool:
-        if re.search(r'<link rel="preconnect" crossorigin href="https:\/\/cdn\.sanity\.io"\/>', response.text, re.IGNORECASE):
-            return True
-
-
-    def is_wix(self, response: requests.Response) -> bool:
-        if "X-Wix-Request-ID" in response.headers:
-            return True
-        if "Server" in response.headers and "pepyaka" in response.headers["Server"].lower():
-            return True
-
-
-    def is_microsoft_asp(self, response: requests.Response) -> bool:
-        if "X-Powered-By" in response.headers and "asp.net" in response.headers["X-Powered-By"].lower():
-            return True
-
-
-    def is_nextjs(self, response: requests.Response) -> bool:
-        if "X-Powered-By" in response.headers and "next.js" in response.headers["X-Powered-By"].lower():
-            return True
-
-
-    def is_jouwweb(self, response: requests.Response) -> bool:
-        if 'powered by <a href="https://www.jouwweb.nl" rel="">jouwweb</a>' in response.text.lower().strip():
-            return True
-        if 'window.jouwweb = window.jouwweb' in response.text.lower() or "jouwweb.templateConfig = {" in response.text.lower():
-            return True
-
-
-    def is_magento(self, response: requests.Response) -> bool:
-        lower_text = response.text.lower().strip()
-        if 'X-Magento-Vary' in response.cookies:
-            return True
-        if 'X-Magento-Tags' in response.headers:
-            return True
-        if '<!--[if lt ie 7]>' in lower_text and '<script type="text/javascript">' in lower_text and '//<![cdata[' in lower_text and '//]]>' in lower_text and '</script>' in lower_text and 'var blank_url =' in lower_text and 'var blank_img =' in lower_text and '<![endif]-->' in lower_text:
-            return True
-        if '<script type="text/x-magento-init">' in lower_text:
-            return True
-
-
-    def is_weebly(self, response: requests.Response) -> bool:
-        if 'X-Host' in response.headers and "weebly.net" in response.headers['X-Host']:
-            return True
-        if '_W.configDomain = "www.weebly.com";' in response.text.lower().strip():
-            return True
-
-
-    def is_ruby_on_rails(self, response: requests.Response) -> bool:
-        if '/rails/active_storage/blobs/' in response.text.lower().strip():
-            return True
-
-
-    def is_joomla(self, response: requests.Response) -> bool:
-        if re.search(r'<meta name="generator" content="Joomla.*" \/>', response.text, re.IGNORECASE):
-            return True
-
-
-    def is_blogger(self, response: requests.Response) -> bool:
-        if '<meta content="blogger" name="generator"/>' in response.text.lower().replace("'", "\""):
-            return True
-        if '<link href="//www.blogger.com" rel="dns-prefetch"/>' in response.text.lower().replace("'", "\""):
-            return True
-
-
-    def is_icordis(self, response: requests.Response) -> bool:
-        if re.search(r'<meta name="generator" content="Icordis CMS.*\/>', response.text, re.IGNORECASE):
-            return True
-
-
-    def is_silverstripe(self, response: requests.Response) -> bool:
-        if re.search(r'<meta name="generator" content="SilverStripe.*\/>', response.text, re.IGNORECASE):
-            return True
-
-
-    def is_sulu(self, response: requests.Response) -> bool:
-        if 'X-Generator' in response.headers and "Sulu/" in response.headers['X-Generator']:
-            return True
             
 
 if __name__ == "__main__":

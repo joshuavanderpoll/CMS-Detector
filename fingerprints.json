@@ -1,0 +1,302 @@
+[
+    {
+        "name": "WordPress",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\"generator\" content=\"WordPress (.+?)\" \/>"
+            }, {
+                "type": "string_contains",
+                "value": "/wp-content/"
+            }, {
+                "type": "string_contains",
+                "value": "/wp-json/"
+            }, {
+                "type": "string_contains",
+                "value": "/wp-includes/"
+            }
+        ]
+    }, {
+        "name": "Shopify",
+        "fingerprints": [
+            {
+                "type": "header_key_equals",
+                "value": "X-Shopify-Stage"
+            }, {
+                "type": "header_key_value_contains",
+                "key": "Link",
+                "value": "https://cdn.shopify.com"
+            }, {
+                "type": "regex",
+                "value": "<link rel=\"preconnect\" href=\"https:\/\/cdn\\.shopify\\.com\".*>"
+            }, {
+                "type": "string_contains",
+                "value": "<style data-shopify>"
+            }
+        ]
+    }, {
+        "name": "Laravel",
+        "fingerprints": [
+            {
+                "type": "cookie_key_value_b64_json_keys",
+                "key": "XSRF-TOKEN",
+                "value": "iv|value|mac"
+            }, {
+                "type": "cookie_substr_key_value_b64_type",
+                "length": -8,
+                "key": "_session",
+                "value": "bytes"
+            }
+        ]
+    }, {
+        "name": "Drupal",
+        "fingerprints": [
+            {
+                "type": "header_key_equals",
+                "value": "X-Drupal-Cache"
+            }, {
+                "type": "header_key_value_contains",
+                "key": "X-Generator",
+                "value": "Drupal"
+            }, {
+                "type": "regex",
+                "value": "<meta name=\"Generator\" content=\"Drupal (.+?) .*\" \/>"
+            }, {
+                "type": "regex",
+                "value": "<script src=\"\/core\/misc\/drupal\\.js\\?v=(.+?)\"><\/script>"
+            }, {
+                "type": "regex",
+                "value": "<script src=\"\/core\/misc\/drupal\\.init\\.js\\?v=(.+?)\"><\/script>"
+            }, {
+                "type": "string_contains",
+                "value": "data-drupal-selector"
+            }, {
+                "type": "string_contains",
+                "value": "data-drupal-form-fields"
+            }, {
+                "type": "string_contains",
+                "value": "data-drupal-link-system-path"
+            }
+        ]
+    }, {
+        "name": "LiteSpeed",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "Server",
+                "value": "LiteSpeed"
+            }
+        ]
+    }, {
+        "name": "PrestaShop",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "Powered-By",
+                "value": "PrestaShop"
+            }, {
+                "type": "string_contains",
+                "value": "/modules/prestatemplate/"
+            }, {
+                "type": "string_contains",
+                "value": "var prestashop = {"
+            }, {
+                "type": "string_contains",
+                "value": "<a href=\"https://www.prestashop.com\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">"
+            }
+        ]
+    }, {
+        "name": "SquareSpace",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "Server",
+                "value": "SquareSpace"
+            }, {
+                "type": "string_contains",
+                "value": "<link rel=\"preconnect\" href=\"https://images.squarespace-cdn.com\">"
+            }, {
+                "type": "string_contains",
+                "value": "<!-- this is squarespace. -->"
+            }, {
+                "type": "string_contains",
+                "value": "<!-- end of squarespace headers -->"
+            }
+        ]
+    }, {
+        "name": "Sanity",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<link rel=\"preconnect\" crossorigin href=\"https:\/\/cdn\\.sanity\\.io\"\/>"
+            }
+        ]
+    }, {
+        "name": "Wix",
+        "fingerprints": [
+            {
+                "type": "header_key_equals",
+                "value": "X-Wix-Request-ID"
+            }, {
+                "type": "header_key_value_contains",
+                "key": "Server",
+                "value": "Pepyaka"
+            }
+        ]
+    }, {
+        "name": "Microsoft ASP.NET",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "X-Powered-By",
+                "value": "ASP.NET"
+            }
+        ]
+    }, {
+        "name": "Next.JS",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "X-Powered-By",
+                "value": "Next.JS"
+            }
+        ]
+    }, {
+        "name": "JouwWeb.nl",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "powered by <a href=\"https://www.jouwweb.nl\" rel=\"\">jouwweb</a>"
+            }, {
+                "type": "string_contains",
+                "value": "window.jouwweb = window.jouwweb"
+            }, {
+                "type": "string_contains",
+                "value": "jouwweb.templateConfig = {"
+            }
+        ]
+    }, {
+        "name": "Magento",
+        "fingerprints": [
+            {
+                "type": "header_key_equals",
+                "value": "X-Magento-Tags"
+            }, {
+                "type": "cookie_key_equals",
+                "value": "X-Magento-Vary"
+            }, {
+                "type": "strings_contain",
+                "value": "<!--[if lt ie 7]>|<script type=\"text/javascript\">|//<![cdata[|//]]>|</script>|var blank_url =|var blank_img =|<![endif]-->"
+            }, {
+                "type": "string_contains",
+                "value": "<script type=\"text/x-magento-init\">"
+            }
+        ]
+    }, {
+        "name": "Weebly",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "X-Host",
+                "value": "weebly.net"
+            }, {
+                "type": "string_contains",
+                "value": "_W.configDomain = \"www.weebly.com\";"
+            }
+        ]
+    }, {
+        "name": "Ruby on Rails",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "/rails/active_storage/blobs/"
+            }
+        ]
+    }, {
+        "name": "Joomla",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\"generator\" content=\"Joomla.*\" \/>"
+            }
+        ]
+    }, {
+        "name": "Blogger",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "<meta content=\"blogger\" name=\"generator\"/>"
+            }, {
+                "type": "string_contains",
+                "value": "<link href=\"//www.blogger.com\" rel=\"dns-prefetch\"/>"
+            }
+        ]
+    }, {
+        "name": "ICordis",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\"generator\" content=\"Icordis CMS.*\/>"
+            }
+        ]
+    }, {
+        "name": "SilverStripe",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\"generator\" content=\"SilverStripe.*\/>"
+            }
+        ]
+    }, {
+        "name": "Sulu",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "X-Generator",
+                "value": "Sulu/"
+            }
+        ]
+    }, {
+        "name": "Express",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "X-Powered-By",
+                "value": "Express"
+            }
+        ]
+    }, {
+        "name": "Gatsby",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\"generator\" content=\"Gatsby.*\/>"
+            }, {
+                "type": "string_contains",
+                "value": "<script id=\"gatsby-script-loader\">"
+            }
+        ]
+    }, {
+        "name": "WebFlow",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "<meta content=\"webflow\" name=\"generator\"/>"
+            }, {
+                "type": "string_contains",
+                "value": "<!-- this site was created in webflow"
+            }
+        ]
+    }, {
+        "name": "Zendesk",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "function zendeskOpenHelp()"
+            }, {
+                "type": "string_contains",
+                "value": "<link rel=\"preconnect\" href=\"https://assets.zendesk.com\""
+            }
+        ]
+    }
+]
