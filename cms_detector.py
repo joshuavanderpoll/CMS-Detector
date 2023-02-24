@@ -39,8 +39,6 @@ class CMSDetector:
             return print("[√] CMS is using Drupal!")
         elif self.is_shopify(response):
             return print("[√] CMS is using Shopify!")
-        elif self.is_litespeed(response):
-            return print("[√] CMS is using LiteSpeed!")
         elif self.is_prestashop(response):
             return print("[√] CMS is using PrestaShop!")
         elif self.is_squarespace(response):
@@ -55,6 +53,26 @@ class CMSDetector:
             return print("[√] CMS is using Next.js!")
         elif self.is_jouwweb(response):
             return print("[√] CMS is using JouwWeb!")
+        elif self.is_jouwweb(response):
+            return print("[√] CMS is using JouwWeb!")
+        elif self.is_magento(response):
+            return print("[√] CMS is using Mageno!")
+        elif self.is_weebly(response):
+            return print("[√] CMS is using Weebly!")
+        elif self.is_litespeed(response):
+            return print("[√] CMS is using LiteSpeed!")
+        elif self.is_ruby_on_rails(response):
+            return print("[√] CMS is using Ruby on rails!")
+        elif self.is_joomla(response):
+            return print("[√] CMS is using Joomla!")
+        elif self.is_blogger(response):
+            return print("[√] CMS is using Blogger!")
+        elif self.is_icordis(response):
+            return print("[√] CMS is using Icordis CMS!")
+        elif self.is_silverstripe(response):
+            return print("[√] CMS is using SilverStripe CMS!")
+        elif self.is_sulu(response):
+            return print("[√] CMS is using Sulu CMS!")
 
         print("[!] No CMS could be detected.")
 
@@ -163,6 +181,57 @@ class CMSDetector:
         if 'powered by <a href="https://www.jouwweb.nl" rel="">jouwweb</a>' in response.text.lower().strip():
             return True
         if 'window.jouwweb = window.jouwweb' in response.text.lower() or "jouwweb.templateConfig = {" in response.text.lower():
+            return True
+
+
+    def is_magento(self, response: requests.Response) -> bool:
+        lower_text = response.text.lower().strip()
+        if 'X-Magento-Vary' in response.cookies:
+            return True
+        if 'X-Magento-Tags' in response.headers:
+            return True
+        if '<!--[if lt ie 7]>' in lower_text and '<script type="text/javascript">' in lower_text and '//<![cdata[' in lower_text and '//]]>' in lower_text and '</script>' in lower_text and 'var blank_url =' in lower_text and 'var blank_img =' in lower_text and '<![endif]-->' in lower_text:
+            return True
+        if '<script type="text/x-magento-init">' in lower_text:
+            return True
+
+
+    def is_weebly(self, response: requests.Response) -> bool:
+        if 'X-Host' in response.headers and "weebly.net" in response.headers['X-Host']:
+            return True
+        if '_W.configDomain = "www.weebly.com";' in response.text.lower().strip():
+            return True
+
+
+    def is_ruby_on_rails(self, response: requests.Response) -> bool:
+        if '/rails/active_storage/blobs/' in response.text.lower().strip():
+            return True
+
+
+    def is_joomla(self, response: requests.Response) -> bool:
+        if re.search(r'<meta name="generator" content="Joomla.*" \/>', response.text, re.IGNORECASE):
+            return True
+
+
+    def is_blogger(self, response: requests.Response) -> bool:
+        if '<meta content="blogger" name="generator"/>' in response.text.lower().replace("'", "\""):
+            return True
+        if '<link href="//www.blogger.com" rel="dns-prefetch"/>' in response.text.lower().replace("'", "\""):
+            return True
+
+
+    def is_icordis(self, response: requests.Response) -> bool:
+        if re.search(r'<meta name="generator" content="Icordis CMS.*\/>', response.text, re.IGNORECASE):
+            return True
+
+
+    def is_silverstripe(self, response: requests.Response) -> bool:
+        if re.search(r'<meta name="generator" content="SilverStripe.*\/>', response.text, re.IGNORECASE):
+            return True
+
+
+    def is_sulu(self, response: requests.Response) -> bool:
+        if 'X-Generator' in response.headers and "Sulu/" in response.headers['X-Generator']:
             return True
             
 

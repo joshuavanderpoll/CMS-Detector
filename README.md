@@ -28,16 +28,19 @@ $
 - [x] Next.js
 - [x] Microsoft ASP
 - [x] JouwWeb
+- [x] Magento
+- [x] Weebly
+- [x] Joomla
+- [x] Blogger
+- [x] SilverStripe CMS
+- [x] Icordis CMS
+- [x] Sulu CMS
 
 ## Upcoming
-- [ ] Joomla
 - [ ] Zendesk
-- [ ] Magento
 - [ ] 000WebHosting
 - [ ] Gatsby
-- [ ] Blogger
 - [ ] Duda
-- [ ] Weebly
 - [ ] GoDaddy
 - [ ] Adobe Dreamweaver
 - [ ] Strato Website
