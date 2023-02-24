@@ -159,6 +159,9 @@
                 "type": "header_key_value_contains",
                 "key": "X-Powered-By",
                 "value": "Next.JS"
+            }, {
+                "type": "string_contains",
+                "value": "<script src=\"/_next/static"
             }
         ]
     }, {
@@ -285,6 +288,12 @@
             }, {
                 "type": "string_contains",
                 "value": "<!-- this site was created in webflow"
+            }, {
+                "type": "regex",
+                "value": "srcset=\"https:\/\/.*\\.webflow\\.com"
+            }, {
+                "type": "regex",
+                "value": "<html data-wf-domain=\"webflow\\..*\""
             }
         ]
     }, {
@@ -296,6 +305,60 @@
             }, {
                 "type": "string_contains",
                 "value": "<link rel=\"preconnect\" href=\"https://assets.zendesk.com\""
+            }
+        ]
+    }, {
+        "name": "Django",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "\"django_env\": \"production\""
+            }
+        ]
+    }, {
+        "name": "CoreMedia CMS",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\"generator\" content=\"CoreMedia.*\">"
+            },
+            {
+                "type": "regex",
+                "value": "<meta name=\"Classification\" content=\"com\\.coremedia\\..*\">"
+            }
+        ]
+    }, {
+        "name": "ProcessWire CMS",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "X-Powered-By",
+                "value": "ProcessWire"
+            }
+        ]
+    }, {
+        "name": "TYPO3",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "This website is powered by TYPO3"
+            }, {
+                "type": "string_contains",
+                "value": "href=\"/typo3temp/"
+            }
+        ]
+    }, {
+        "name": "Blox CMS",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<script.*src=\"https:\/\/bloximages\\..*>"
+            }, {
+                "type": "string_contains",
+                "value": "var bloxServiceIDs"
+            }, {
+                "type": "string_contains",
+                "value": "bloxServiceIDs.push();"
             }
         ]
     }

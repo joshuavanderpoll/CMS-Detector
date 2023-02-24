@@ -11,10 +11,11 @@ import readline
 
 
 class CMSDetector:
-    def __init__(self, host) -> None:
+    def __init__(self, host, raw=False) -> None:
         self.session = requests.session()
         self.host = host
         self.fingerprints = []
+        self.raw = raw
 
         self.load_fingerprints()
         self.scan_cms()
@@ -27,7 +28,8 @@ class CMSDetector:
 
 
     def scan_cms(self):
-        print(f"[@] Scanning host {self.host}...")
+        if not self.raw:
+            print(f"[@] Scanning host {self.host}...")
 
         response = self.session.get(self.host, headers={
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
@@ -127,7 +129,6 @@ class CMSDetector:
                 # Checks end of header key and value type after decoding from Base64
                 if frpr['type'] == 'cookie_substr_key_value_b64_type':
                     for cookie in response.cookies:
-                        print(cookie.name[frpr['length']:])
                         if cookie.name[frpr['length']:] == frpr['key']:
                             try:
                                 url_decoded = urllib.parse.unquote(cookie.value)
@@ -140,10 +141,16 @@ class CMSDetector:
                                 pass
 
             if match:
-                print(f"[√] CMS is using {cms['name']}!")
+                if not self.raw:
+                    print(f"[√] \"{self.host}\" is using \"{cms['name']}\"!")
+                else:
+                    print(str(cms['name']).lower().replace(" ", "_"))
                 return
 
-        print("[!] No CMS could be detected.")
+        if not self.raw:
+            print("[!] No CMS could be detected.")
+        else:
+            print('null')
             
 
 if __name__ == "__main__":
@@ -151,6 +158,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(prog = 'CMS Detector', description = 'What the program does', epilog = 'Created by: https://github.com/joshuavanderpoll')
     parser.add_argument('--host', default=None, type=str)
+    parser.add_argument('--raw', default=False, action='store_true', help="Returns only the result (null = No result)")
     args = parser.parse_args()
 
     if args.host == None:
@@ -161,4 +169,4 @@ if __name__ == "__main__":
 
     args.host = args.host.rstrip("/").strip()
 
-    CMSDetector(args.host)
+    CMSDetector(args.host, args.raw)
