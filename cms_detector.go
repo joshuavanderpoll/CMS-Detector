@@ -31,20 +31,8 @@ const (
 	END      = "\033[0m"
 )
 
-type Fingerprint struct {
-	Type   string `json:"type"`
-	Value  string `json:"value,omitempty"`
-	Key    string `json:"key,omitempty"`
-	Length int    `json:"length,omitempty"`
-}
-
-type CMS struct {
-	Name         string        `json:"name"`
-	Fingerprints []Fingerprint `json:"fingerprints"`
-}
-
 type preparedFP struct {
-	fp    Fingerprint
+	fp    fingerprints.Fingerprint
 	re    *regexp.Regexp // compiled when type == "regex"
 	rawRe string
 }
@@ -80,16 +68,7 @@ func normalizeHost(h string) string {
 	return strings.TrimRight(h, "/")
 }
 
-func readFingerprints() ([]CMS, error) {
-	var arr []CMS
-	dec := json.NewDecoder(strings.NewReader(string(fingerprints.Data)))
-	if err := dec.Decode(&arr); err != nil {
-		return nil, err
-	}
-	return arr, nil
-}
-
-func prepare(cms []CMS) []preparedCMS {
+func prepare(cms []fingerprints.CMS) []preparedCMS {
 	out := make([]preparedCMS, 0, len(cms))
 	for _, c := range cms {
 		pc := preparedCMS{Name: c.Name}
@@ -365,18 +344,7 @@ func main() {
 	host = normalizeHost(host)
 
 	// Load fingerprints
-	rawFP, err := readFingerprints()
-	if err != nil {
-		if jsonMode {
-			j := jsonOut{Host: host, Error: fmt.Sprintf("Could not parse fingerprints: %v", err)}
-			enc := json.NewEncoder(os.Stdout)
-			enc.SetEscapeHTML(false)
-			_ = enc.Encode(j)
-		} else {
-			fmt.Println(RED + fmt.Sprintf("[!] Could not parse fingerprints: %v", err) + END)
-		}
-		os.Exit(1)
-	}
+	rawFP := fingerprints.All
 	prepared := prepare(rawFP)
 
 	if !(raw || jsonMode) {

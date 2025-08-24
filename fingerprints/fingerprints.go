@@ -1,987 +1,479 @@
 package fingerprints
 
-var Data = []byte(`[
-    {
-        "name": "WordPress",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\"generator\" content=\"WordPress (.+?)\" />"
-            },
-            {
-                "type": "string_contains",
-                "value": "/wp-content/"
-            },
-            {
-                "type": "string_contains",
-                "value": "/wp-json/"
-            },
-            {
-                "type": "string_contains",
-                "value": "/wp-includes/"
-            }
-        ]
-    },
-    {
-        "name": "Shopify",
-        "fingerprints": [
-            {
-                "type": "header_key_equals",
-                "value": "X-Shopify-Stage"
-            },
-            {
-                "type": "header_key_value_contains",
-                "key": "Link",
-                "value": "https://cdn.shopify.com"
-            },
-            {
-                "type": "regex",
-                "value": "<link rel=\"preconnect\" href=\"https://cdn\\.shopify\\.com\".*>"
-            },
-            {
-                "type": "string_contains",
-                "value": "<style data-shopify>"
-            }
-        ]
-    },
-    {
-        "name": "Laravel",
-        "fingerprints": [
-            {
-                "type": "cookie_key_value_b64_json_keys",
-                "key": "XSRF-TOKEN",
-                "value": "iv|value|mac"
-            },
-            {
-                "type": "cookie_substr_key_value_b64_type",
-                "length": -8,
-                "key": "_session",
-                "value": "bytes"
-            }
-        ]
-    },
-    {
-        "name": "Drupal",
-        "fingerprints": [
-            {
-                "type": "header_key_equals",
-                "value": "X-Drupal-Cache"
-            },
-            {
-                "type": "header_key_value_contains",
-                "key": "X-Generator",
-                "value": "Drupal"
-            },
-            {
-                "type": "regex",
-                "value": "<meta name=\"Generator\" content=\"Drupal (.+?) .*\" />"
-            },
-            {
-                "type": "regex",
-                "value": "<script src=\"/core/misc/drupal\\.js\\?v=(.+?)\"></script>"
-            },
-            {
-                "type": "regex",
-                "value": "<script src=\"/core/misc/drupal\\.init\\.js\\?v=(.+?)\"></script>"
-            },
-            {
-                "type": "string_contains",
-                "value": "data-drupal-selector"
-            },
-            {
-                "type": "string_contains",
-                "value": "data-drupal-form-fields"
-            },
-            {
-                "type": "string_contains",
-                "value": "data-drupal-link-system-path"
-            }
-        ]
-    },
-    {
-        "name": "LiteSpeed",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "Server",
-                "value": "LiteSpeed"
-            }
-        ]
-    },
-    {
-        "name": "PrestaShop",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "Powered-By",
-                "value": "PrestaShop"
-            },
-            {
-                "type": "string_contains",
-                "value": "/modules/prestatemplate/"
-            },
-            {
-                "type": "string_contains",
-                "value": "var prestashop = {"
-            },
-            {
-                "type": "string_contains",
-                "value": "<a href=\"https://www.prestashop.com\" target=\"_blank\" rel=\"noopener noreferrer nofollow\">"
-            }
-        ]
-    },
-    {
-        "name": "SquareSpace",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "Server",
-                "value": "SquareSpace"
-            },
-            {
-                "type": "string_contains",
-                "value": "<link rel=\"preconnect\" href=\"https://images.squarespace-cdn.com\">"
-            },
-            {
-                "type": "string_contains",
-                "value": "<!-- this is squarespace. -->"
-            },
-            {
-                "type": "string_contains",
-                "value": "<!-- end of squarespace headers -->"
-            }
-        ]
-    },
-    {
-        "name": "Sanity",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<link rel=\"preconnect\" crossorigin href=\"https://cdn\\.sanity\\.io\"/>"
-            }
-        ]
-    },
-    {
-        "name": "Wix",
-        "fingerprints": [
-            {
-                "type": "header_key_equals",
-                "value": "X-Wix-Request-ID"
-            },
-            {
-                "type": "header_key_value_contains",
-                "key": "Server",
-                "value": "Pepyaka"
-            }
-        ]
-    },
-    {
-        "name": "Microsoft ASP.NET",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "X-Powered-By",
-                "value": "ASP.NET"
-            }
-        ]
-    },
-    {
-        "name": "Next.JS",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "X-Powered-By",
-                "value": "Next.JS"
-            },
-            {
-                "type": "string_contains",
-                "value": "<script src=\"/_next/static"
-            }
-        ]
-    },
-    {
-        "name": "JouwWeb.nl",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "powered by <a href=\"https://www.jouwweb.nl\" rel=\"\">jouwweb</a>"
-            },
-            {
-                "type": "string_contains",
-                "value": "window.jouwweb = window.jouwweb"
-            },
-            {
-                "type": "string_contains",
-                "value": "jouwweb.templateConfig = {"
-            }
-        ]
-    },
-    {
-        "name": "Magento",
-        "fingerprints": [
-            {
-                "type": "header_key_equals",
-                "value": "X-Magento-Tags"
-            },
-            {
-                "type": "cookie_key_equals",
-                "value": "X-Magento-Vary"
-            },
-            {
-                "type": "strings_contain",
-                "value": "<!--[if lt ie 7]>|<script type=\"text/javascript\">|//<![cdata[|//]]>|</script>|var blank_url =|var blank_img =|<![endif]-->"
-            },
-            {
-                "type": "string_contains",
-                "value": "<script type=\"text/x-magento-init\">"
-            }
-        ]
-    },
-    {
-        "name": "Weebly",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "X-Host",
-                "value": "weebly.net"
-            },
-            {
-                "type": "string_contains",
-                "value": "_W.configDomain = \"www.weebly.com\";"
-            }
-        ]
-    },
-    {
-        "name": "Ruby on Rails",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "/rails/active_storage/blobs/"
-            }
-        ]
-    },
-    {
-        "name": "Joomla",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\"generator\" content=\"Joomla.*\" />"
-            }
-        ]
-    },
-    {
-        "name": "Blogger",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "<meta content=\"blogger\" name=\"generator\"/>"
-            },
-            {
-                "type": "string_contains",
-                "value": "<link href=\"//www.blogger.com\" rel=\"dns-prefetch\"/>"
-            }
-        ]
-    },
-    {
-        "name": "ICordis",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\"generator\" content=\"Icordis CMS.*/>"
-            }
-        ]
-    },
-    {
-        "name": "SilverStripe",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\"generator\" content=\"SilverStripe.*/>"
-            }
-        ]
-    },
-    {
-        "name": "Sulu",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "X-Generator",
-                "value": "Sulu/"
-            }
-        ]
-    },
-    {
-        "name": "Express",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "X-Powered-By",
-                "value": "Express"
-            }
-        ]
-    },
-    {
-        "name": "Gatsby",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\"generator\" content=\"Gatsby.*/>"
-            },
-            {
-                "type": "string_contains",
-                "value": "<script id=\"gatsby-script-loader\">"
-            }
-        ]
-    },
-    {
-        "name": "WebFlow",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "<meta content=\"webflow\" name=\"generator\"/>"
-            },
-            {
-                "type": "string_contains",
-                "value": "<!-- this site was created in webflow"
-            },
-            {
-                "type": "regex",
-                "value": "srcset=\"https://.*\\.webflow\\.com"
-            },
-            {
-                "type": "regex",
-                "value": "<html data-wf-domain=\"webflow\\..*\""
-            }
-        ]
-    },
-    {
-        "name": "Zendesk",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "function zendeskOpenHelp()"
-            },
-            {
-                "type": "string_contains",
-                "value": "<link rel=\"preconnect\" href=\"https://assets.zendesk.com\""
-            }
-        ]
-    },
-    {
-        "name": "Django",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "\"django_env\": \"production\""
-            }
-        ]
-    },
-    {
-        "name": "CoreMedia CMS",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\"generator\" content=\"CoreMedia.*\">"
-            },
-            {
-                "type": "regex",
-                "value": "<meta name=\"Classification\" content=\"com\\.coremedia\\..*\">"
-            }
-        ]
-    },
-    {
-        "name": "ProcessWire CMS",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "X-Powered-By",
-                "value": "ProcessWire"
-            }
-        ]
-    },
-    {
-        "name": "TYPO3",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "This website is powered by TYPO3"
-            },
-            {
-                "type": "string_contains",
-                "value": "href=\"/typo3temp/"
-            }
-        ]
-    },
-    {
-        "name": "Blox CMS",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<script.*src=\"https://bloximages\\..*>"
-            },
-            {
-                "type": "string_contains",
-                "value": "var bloxServiceIDs"
-            },
-            {
-                "type": "string_contains",
-                "value": "bloxServiceIDs.push();"
-            }
-        ]
-    },
-    {
-        "name": "Netifly",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "Server",
-                "value": "Netlify"
-            }
-        ]
-    },
-    {
-        "name": "Odoo",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "<meta name=\"generator\" content=\"Odoo\"/>"
-            },
-            {
-                "type": "regex",
-                "value": "<script.*id=\"web.layout.odooscript\".*>"
-            }
-        ]
-    },
-    {
-        "name": "Amazon S3 (Static Website)",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "Server",
-                "value": "AmazonS3"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-amz-id-2"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-amz-request-id"
-            },
-            {
-                "type": "regex",
-                "value": "<Error>\\s*<Code>NoSuchKey<\\/Code>"
-            }
-        ]
-    },
-    {
-        "name": "Vercel",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "server",
-                "value": "vercel"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-vercel-id"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-vercel-cache"
-            },
-            {
-                "type": "string_contains",
-                "value": "<meta name=\"vercel\" content="
-            }
-        ]
-    },
-    {
-        "name": "GitHub Pages",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "server",
-                "value": "GitHub.com"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-github-request-id"
-            },
-            {
-                "type": "header_key_value_contains",
-                "key": "x-served-by",
-                "value": "github"
-            }
-        ]
-    },
-    {
-        "name": "Ghost",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\"generator\" content=\"Ghost ?([0-9]+\\.[0-9]+.*?)\"\\s*\\/?>(?i)"
-            },
-            {
-                "type": "string_contains",
-                "value": "/ghost/api/"
-            },
-            {
-                "type": "string_contains",
-                "value": "<script src=\"/public/ghost-sdk"
-            }
-        ]
-    },
-    {
-        "name": "Craft CMS",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "x-powered-by",
-                "value": "Craft CMS"
-            },
-            {
-                "type": "header_key_value_contains",
-                "key": "x-generator",
-                "value": "Craft CMS"
-            },
-            {
-                "type": "cookie_key_equals",
-                "value": "CraftSessionId"
-            }
-        ]
-    },
-    {
-        "name": "Umbraco",
-        "fingerprints": [
-            {
-                "type": "header_key_equals",
-                "value": "x-umbraco-version"
-            },
-            {
-                "type": "string_contains",
-                "value": "href=\"/umbraco/"
-            },
-            {
-                "type": "string_contains",
-                "value": "src=\"/umbraco/"
-            }
-        ]
-    },
-    {
-        "name": "Sitecore",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "x-generator",
-                "value": "Sitecore"
-            },
-            {
-                "type": "cookie_key_equals",
-                "value": "SC_ANALYTICS_GLOBAL_COOKIE"
-            }
-        ]
-    },
-    {
-        "name": "Strapi",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "x-powered-by",
-                "value": "Strapi"
-            },
-            {
-                "type": "regex",
-                "value": "<meta name=\"generator\" content=\"strapi\"\\s*/?>"
-            },
-            {
-                "type": "string_contains",
-                "value": "/admin/runtime."
-            }
-        ]
-    },
-    {
-        "name": "HubSpot CMS",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "x-powered-by",
-                "value": "HubSpot"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-hs-cache-config"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-hs-cf-cache-control"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-hs-cf-cache-status"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-hs-cfworker-meta"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-hs-content-id"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-hs-hub-id"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-hs-prerendered"
-            },
-            {
-                "type": "regex",
-                "value": "<meta name=\"generator\" content=\"HubSpot.*\"\\s*/?>"
-            }
-        ]
-    },
-    {
-        "name": "BigCommerce",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "link",
-                "value": "bigcommerce.com"
-            },
-            {
-                "type": "cookie_key_equals",
-                "value": "SHOP_SESSION_TOKEN"
-            },
-            {
-                "type": "cookie_key_equals",
-                "value": "athena_short_visit_id"
-            },
-            {
-                "type": "cookie_key_equals",
-                "value": "fornax_anonymousId"
-            },
-            {
-                "type": "cookie_key_equals",
-                "value": "SF-CSRF-TOKEN"
-            },
-            {
-                "type": "string_contains",
-                "value": "window.stencilBootstrap"
-            }
-        ]
-    },
-    {
-        "name": "Tilda",
-        "fingerprints": [
-            {
-                "type": "header_key_equals",
-                "value": "x-tilda-server"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "x-tilda-imprint"
-            },
-            {
-                "type": "regex",
-                "value": "src=\\\"https:\\/\\/static\\.tildacdn\\.com\\/.*\\\""
-            },
-            {
-                "type": "string_contains",
-                "value": "tilda-blocks"
-            }
-        ]
-    },
-    {
-        "name": "Webnode",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\"generator\" content=\"Webnode .*\"\\s*/?>"
-            }
-        ]
-    },
-    {
-        "name": "GoDaddy Website Builder",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "GoDaddy Website Builder"
-            },
-            {
-                "type": "string_contains",
-                "value": "A website created by GoDaddy’s"
-            }
-        ]
-    },
-    {
-        "name": "Adobe Dreamweaver (static template)",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<!--\\s*InstanceBeginEditable"
-            },
-            {
-                "type": "regex",
-                "value": "<!--\\s*InstanceEndEditable"
-            },
-            {
-                "type": "regex",
-                "value": "<!-- TemplateBeginEditable"
-            }
-        ]
-    },
-    {
-        "name": "Strato Website Builder",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "strato-editor"
-            },
-            {
-                "type": "string_contains",
-                "value": "strato-website-builder"
-            }
-        ]
-    },
-    {
-        "name": "Google Sites",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "docs-prn\":\"Google Sites\""
-            }
-        ]
-    },
-    {
-        "name": "Duda",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "dmAPI.runOnReady("
-            },
-            {
-                "type": "string_contains",
-                "value": "dmAPI.getSiteName("
-            },
-            {
-                "type": "string_contains",
-                "value": "dmAPI.loadScript("
-            },
-            {
-                "type": "regex",
-                "value": "https?://(?:static|irp|lirp)\\.cdn-website\\.com/"
-            }
-        ]
-    },
-    {
-        "name": "Nuxt.js",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "id=\"__nuxt\""
-            },
-            {
-                "type": "string_contains",
-                "value": "/_nuxt/"
-            },
-            {
-                "type": "header_key_value_contains",
-                "key": "X-Powered-By",
-                "value": "Nuxt"
-            }
-        ]
-    },
-    {
-        "name": "OpenCart",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\\\"generator\\\" content=\\\"OpenCart.*\\\"\\s*/?>"
-            },
-            {
-                "type": "string_contains",
-                "value": "/image/catalog/opencart.ico"
-            },
-            {
-                "type": "cookie_key_equals",
-                "value": "OCSESSID"
-            },
-            {
-                "type": "string_contains",
-                "value": "OpenCart is open source software and you are free to remove the powered by OpenCart"
-            }
-        ]
-    },
-    {
-        "name": "Bitrix (1C-Bitrix)",
-        "fingerprints": [
-            {
-                "type": "header_key_value_contains",
-                "key": "X-Powered-CMS",
-                "value": "Bitrix Site Manager"
-            },
-            {
-                "type": "cookie_key_equals",
-                "value": "BITRIX_SM_GUEST_ID"
-            },
-            {
-                "type": "cookie_key_equals",
-                "value": "BITRIX_SM_LAST_VISIT"
-            },
-            {
-                "type": "header_key_value_contains",
-                "key": "P3P",
-                "value": "policyref=\"/bitrix/p3p.xml\""
-            }
-        ]
-    },
-    {
-        "name": "Jimdo",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\\\"generator\\\" content=\\\"Jimdo Creator.*\\\"\\s*/?>"
-            },
-            {
-                "type": "regex",
-                "value": "https?://assets\\.jimstatic\\.com/"
-            },
-            {
-                "type": "header_key_equals",
-                "value": "X-Jimdo-Wid"
-            }
-        ]
-    },
-    {
-        "name": "Adobe Experience Manager",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "/etc.clientlibs/"
-            },
-            {
-                "type": "regex",
-                "value": "/etc\\.clientlibs/(?:granite|foundation)/"
-            }
-        ]
-    },
-    {
-        "name": "Microsoft Word (generated HTML)",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\\\"Generator\\\" content=\\\"Microsoft Word.*\\\">"
-            }
-        ]
-    },
-    {
-        "name": "Contao",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\\\"generator\\\" content=\\\"Contao.*\\\"\\s*/?>"
-            },
-            {
-                "type": "string_contains",
-                "value": "content=\"Contao Open Source CMS\""
-            },
-            {
-                "type": "header_key_equals",
-                "value": "Contao-Cache"
-            }
-        ]
-    },
-    {
-        "name": "IONOS MyWebsite",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "https?://(?:assets\\.)?mywebsite-?editor\\.com/"
-            },
-            {
-                "type": "regex",
-                "value": "https?://.*\\.mywebsite-?builder\\.com/"
-            },
-            {
-                "type": "header_key_value_contains",
-                "key": "Content-Security-Policy",
-                "value": "https://*.mywebsite-editor.com"
-            }
-        ]
-    },
-    {
-        "name": "Salesforce Experience Cloud",
-        "fingerprints": [
-            {
-                "type": "string_contains",
-                "value": "LightningOutApp"
-            },
-            {
-                "type": "regex",
-                "value": "<meta name=\\\"generator\\\" content=\\\"Salesforce.*\\\"\\s*/?>"
-            },
-            {
-                "type": "header_key_value_contains",
-                "key": "Server",
-                "value": "Salesforce.com"
-            }
-        ]
-    },
-    {
-        "name": "Mobirise",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\\\"generator\\\" content=\\\"Mobirise.*\\\"\\s*/?>"
-            },
-            {
-                "type": "string_contains",
-                "value": "assets/mobirise/css/mbr-additional.css"
-            },
-            {
-                "type": "string_contains",
-                "value": "data-app-tag=\"mobirise\""
-            },
-            {
-                "type": "string_contains",
-                "value": "Site made with Mobirise Website Builder"
-            }
-        ]
-    },
-    {
-        "name": "Microsoft FrontPage",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\\\"GENERATOR\\\" content=\\\"Microsoft FrontPage.*\\\">"
-            },
-            {
-                "type": "string_contains",
-                "value": "content=\"Microsoft FrontPage"
-            },
-            {
-                "type": "string_contains",
-                "value": "content=\"FrontPage.Editor.Document\""
-            }
-        ]
-    },
-    {
-        "name": "Adobe Muse",
-        "fingerprints": [
-            {
-                "type": "regex",
-                "value": "<meta name=\\\"generator\\\" content=\\\"Adobe Muse.*\\\"\\s*/?>"
-            },
-            {
-                "type": "string_contains",
-                "value": "jquery.musemenu.js"
-            },
-            {
-                "type": "string_contains",
-                "value": "data-muse-uid="
-            }
-        ]
-    }
-]`)
+type CMS struct {
+	Name         string        `json:"name"`
+	Fingerprints []Fingerprint `json:"fingerprints"`
+}
+
+type Fingerprint struct {
+	Type   string `json:"type"`
+	Value  string `json:"value,omitempty"`
+	Key    string `json:"key,omitempty"`
+	Length int    `json:"length,omitempty"`
+}
+
+var All = []CMS{
+	{
+		Name: `WordPress`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name="generator" content="WordPress (.+?)" />`},
+			{Type: `string_contains`, Value: `/wp-content/`},
+			{Type: `string_contains`, Value: `/wp-json/`},
+			{Type: `string_contains`, Value: `/wp-includes/`},
+		},
+	},
+	{
+		Name: `Shopify`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_equals`, Value: `X-Shopify-Stage`},
+			{Type: `header_key_value_contains`, Value: `https://cdn.shopify.com`, Key: `Link`},
+			{Type: `regex`, Value: `<link rel="preconnect" href="https://cdn\.shopify\.com".*>`},
+			{Type: `string_contains`, Value: `<style data-shopify>`},
+		},
+	},
+	{
+		Name: `Laravel`,
+		Fingerprints: []Fingerprint{
+			{Type: `cookie_key_value_b64_json_keys`, Value: `iv|value|mac`, Key: `XSRF-TOKEN`},
+			{Type: `cookie_substr_key_value_b64_type`, Value: `bytes`, Key: `_session`, Length: -8},
+		},
+	},
+	{
+		Name: `Drupal`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_equals`, Value: `X-Drupal-Cache`},
+			{Type: `header_key_value_contains`, Value: `Drupal`, Key: `X-Generator`},
+			{Type: `regex`, Value: `<meta name="Generator" content="Drupal (.+?) .*" />`},
+			{Type: `regex`, Value: `<script src="/core/misc/drupal\.js\?v=(.+?)"></script>`},
+			{Type: `regex`, Value: `<script src="/core/misc/drupal\.init\.js\?v=(.+?)"></script>`},
+			{Type: `string_contains`, Value: `data-drupal-selector`},
+			{Type: `string_contains`, Value: `data-drupal-form-fields`},
+			{Type: `string_contains`, Value: `data-drupal-link-system-path`},
+		},
+	},
+	{
+		Name: `LiteSpeed`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `LiteSpeed`, Key: `Server`},
+		},
+	},
+	{
+		Name: `PrestaShop`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `PrestaShop`, Key: `Powered-By`},
+			{Type: `string_contains`, Value: `/modules/prestatemplate/`},
+			{Type: `string_contains`, Value: `var prestashop = {`},
+			{Type: `string_contains`, Value: `<a href="https://www.prestashop.com" target="_blank" rel="noopener noreferrer nofollow">`},
+		},
+	},
+	{
+		Name: `SquareSpace`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `SquareSpace`, Key: `Server`},
+			{Type: `string_contains`, Value: `<link rel="preconnect" href="https://images.squarespace-cdn.com">`},
+			{Type: `string_contains`, Value: `<!-- this is squarespace. -->`},
+			{Type: `string_contains`, Value: `<!-- end of squarespace headers -->`},
+		},
+	},
+	{
+		Name: `Sanity`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<link rel="preconnect" crossorigin href="https://cdn\.sanity\.io"/>`},
+		},
+	},
+	{
+		Name: `Wix`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_equals`, Value: `X-Wix-Request-ID`},
+			{Type: `header_key_value_contains`, Value: `Pepyaka`, Key: `Server`},
+		},
+	},
+	{
+		Name: `Microsoft ASP.NET`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `ASP.NET`, Key: `X-Powered-By`},
+		},
+	},
+	{
+		Name: `Next.JS`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `Next.JS`, Key: `X-Powered-By`},
+			{Type: `string_contains`, Value: `<script src="/_next/static`},
+		},
+	},
+	{
+		Name: `JouwWeb.nl`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `powered by <a href="https://www.jouwweb.nl" rel="">jouwweb</a>`},
+			{Type: `string_contains`, Value: `window.jouwweb = window.jouwweb`},
+			{Type: `string_contains`, Value: `jouwweb.templateConfig = {`},
+		},
+	},
+	{
+		Name: `Magento`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_equals`, Value: `X-Magento-Tags`},
+			{Type: `cookie_key_equals`, Value: `X-Magento-Vary`},
+			{Type: `strings_contain`, Value: `<!--[if lt ie 7]>|<script type="text/javascript">|//<![cdata[|//]]>|</script>|var blank_url =|var blank_img =|<![endif]-->`},
+			{Type: `string_contains`, Value: `<script type="text/x-magento-init">`},
+		},
+	},
+	{
+		Name: `Weebly`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `weebly.net`, Key: `X-Host`},
+			{Type: `string_contains`, Value: `_W.configDomain = "www.weebly.com";`},
+		},
+	},
+	{
+		Name: `Ruby on Rails`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `/rails/active_storage/blobs/`},
+		},
+	},
+	{
+		Name: `Joomla`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name="generator" content="Joomla.*" />`},
+		},
+	},
+	{
+		Name: `Blogger`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `<meta content="blogger" name="generator"/>`},
+			{Type: `string_contains`, Value: `<link href="//www.blogger.com" rel="dns-prefetch"/>`},
+		},
+	},
+	{
+		Name: `ICordis`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name="generator" content="Icordis CMS.*/>`},
+		},
+	},
+	{
+		Name: `SilverStripe`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name="generator" content="SilverStripe.*/>`},
+		},
+	},
+	{
+		Name: `Sulu`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `Sulu/`, Key: `X-Generator`},
+		},
+	},
+	{
+		Name: `Express`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `Express`, Key: `X-Powered-By`},
+		},
+	},
+	{
+		Name: `Gatsby`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name="generator" content="Gatsby.*/>`},
+			{Type: `string_contains`, Value: `<script id="gatsby-script-loader">`},
+		},
+	},
+	{
+		Name: `WebFlow`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `<meta content="webflow" name="generator"/>`},
+			{Type: `string_contains`, Value: `<!-- this site was created in webflow`},
+			{Type: `regex`, Value: `srcset="https://.*\.webflow\.com`},
+			{Type: `regex`, Value: `<html data-wf-domain="webflow\..*"`},
+		},
+	},
+	{
+		Name: `Zendesk`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `function zendeskOpenHelp()`},
+			{Type: `string_contains`, Value: `<link rel="preconnect" href="https://assets.zendesk.com"`},
+		},
+	},
+	{
+		Name: `Django`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `"django_env": "production"`},
+		},
+	},
+	{
+		Name: `CoreMedia CMS`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name="generator" content="CoreMedia.*">`},
+			{Type: `regex`, Value: `<meta name="Classification" content="com\.coremedia\..*">`},
+		},
+	},
+	{
+		Name: `ProcessWire CMS`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `ProcessWire`, Key: `X-Powered-By`},
+		},
+	},
+	{
+		Name: `TYPO3`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `This website is powered by TYPO3`},
+			{Type: `string_contains`, Value: `href="/typo3temp/`},
+		},
+	},
+	{
+		Name: `Blox CMS`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<script.*src="https://bloximages\..*>`},
+			{Type: `string_contains`, Value: `var bloxServiceIDs`},
+			{Type: `string_contains`, Value: `bloxServiceIDs.push();`},
+		},
+	},
+	{
+		Name: `Netifly`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `Netlify`, Key: `Server`},
+		},
+	},
+	{
+		Name: `Odoo`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `<meta name="generator" content="Odoo"/>`},
+			{Type: `regex`, Value: `<script.*id="web.layout.odooscript".*>`},
+		},
+	},
+	{
+		Name: `Amazon S3 (Static Website)`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `AmazonS3`, Key: `Server`},
+			{Type: `header_key_equals`, Value: `x-amz-id-2`},
+			{Type: `header_key_equals`, Value: `x-amz-request-id`},
+			{Type: `regex`, Value: `<Error>\s*<Code>NoSuchKey<\/Code>`},
+		},
+	},
+	{
+		Name: `Vercel`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `vercel`, Key: `server`},
+			{Type: `header_key_equals`, Value: `x-vercel-id`},
+			{Type: `header_key_equals`, Value: `x-vercel-cache`},
+			{Type: `string_contains`, Value: `<meta name="vercel" content=`},
+		},
+	},
+	{
+		Name: `GitHub Pages`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `GitHub.com`, Key: `server`},
+			{Type: `header_key_equals`, Value: `x-github-request-id`},
+			{Type: `header_key_value_contains`, Value: `github`, Key: `x-served-by`},
+		},
+	},
+	{
+		Name: `Ghost`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name="generator" content="Ghost ?([0-9]+\.[0-9]+.*?)"\s*\/?>(?i)`},
+			{Type: `string_contains`, Value: `/ghost/api/`},
+			{Type: `string_contains`, Value: `<script src="/public/ghost-sdk`},
+		},
+	},
+	{
+		Name: `Craft CMS`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `Craft CMS`, Key: `x-powered-by`},
+			{Type: `header_key_value_contains`, Value: `Craft CMS`, Key: `x-generator`},
+			{Type: `cookie_key_equals`, Value: `CraftSessionId`},
+		},
+	},
+	{
+		Name: `Umbraco`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_equals`, Value: `x-umbraco-version`},
+			{Type: `string_contains`, Value: `href="/umbraco/`},
+			{Type: `string_contains`, Value: `src="/umbraco/`},
+		},
+	},
+	{
+		Name: `Sitecore`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `Sitecore`, Key: `x-generator`},
+			{Type: `cookie_key_equals`, Value: `SC_ANALYTICS_GLOBAL_COOKIE`},
+		},
+	},
+	{
+		Name: `Strapi`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `Strapi`, Key: `x-powered-by`},
+			{Type: `regex`, Value: `<meta name="generator" content="strapi"\s*/?>`},
+			{Type: `string_contains`, Value: `/admin/runtime.`},
+		},
+	},
+	{
+		Name: `HubSpot CMS`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `HubSpot`, Key: `x-powered-by`},
+			{Type: `header_key_equals`, Value: `x-hs-cache-config`},
+			{Type: `header_key_equals`, Value: `x-hs-cf-cache-control`},
+			{Type: `header_key_equals`, Value: `x-hs-cf-cache-status`},
+			{Type: `header_key_equals`, Value: `x-hs-cfworker-meta`},
+			{Type: `header_key_equals`, Value: `x-hs-content-id`},
+			{Type: `header_key_equals`, Value: `x-hs-hub-id`},
+			{Type: `header_key_equals`, Value: `x-hs-prerendered`},
+			{Type: `regex`, Value: `<meta name="generator" content="HubSpot.*"\s*/?>`},
+		},
+	},
+	{
+		Name: `BigCommerce`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `bigcommerce.com`, Key: `link`},
+			{Type: `cookie_key_equals`, Value: `SHOP_SESSION_TOKEN`},
+			{Type: `cookie_key_equals`, Value: `athena_short_visit_id`},
+			{Type: `cookie_key_equals`, Value: `fornax_anonymousId`},
+			{Type: `cookie_key_equals`, Value: `SF-CSRF-TOKEN`},
+			{Type: `string_contains`, Value: `window.stencilBootstrap`},
+		},
+	},
+	{
+		Name: `Tilda`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_equals`, Value: `x-tilda-server`},
+			{Type: `header_key_equals`, Value: `x-tilda-imprint`},
+			{Type: `regex`, Value: `src=\"https:\/\/static\.tildacdn\.com\/.*\"`},
+			{Type: `string_contains`, Value: `tilda-blocks`},
+		},
+	},
+	{
+		Name: `Webnode`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name="generator" content="Webnode .*"\s*/?>`},
+		},
+	},
+	{
+		Name: `GoDaddy Website Builder`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `GoDaddy Website Builder`},
+			{Type: `string_contains`, Value: `A website created by GoDaddy’s`},
+		},
+	},
+	{
+		Name: `Adobe Dreamweaver (static template)`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<!--\s*InstanceBeginEditable`},
+			{Type: `regex`, Value: `<!--\s*InstanceEndEditable`},
+			{Type: `regex`, Value: `<!-- TemplateBeginEditable`},
+		},
+	},
+	{
+		Name: `Strato Website Builder`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `strato-editor`},
+			{Type: `string_contains`, Value: `strato-website-builder`},
+		},
+	},
+	{
+		Name: `Google Sites`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `docs-prn":"Google Sites"`},
+		},
+	},
+	{
+		Name: `Duda`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `dmAPI.runOnReady(`},
+			{Type: `string_contains`, Value: `dmAPI.getSiteName(`},
+			{Type: `string_contains`, Value: `dmAPI.loadScript(`},
+			{Type: `regex`, Value: `https?://(?:static|irp|lirp)\.cdn-website\.com/`},
+		},
+	},
+	{
+		Name: `Nuxt.js`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `id="__nuxt"`},
+			{Type: `string_contains`, Value: `/_nuxt/`},
+			{Type: `header_key_value_contains`, Value: `Nuxt`, Key: `X-Powered-By`},
+		},
+	},
+	{
+		Name: `OpenCart`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name=\"generator\" content=\"OpenCart.*\"\s*/?>`},
+			{Type: `string_contains`, Value: `/image/catalog/opencart.ico`},
+			{Type: `cookie_key_equals`, Value: `OCSESSID`},
+			{Type: `string_contains`, Value: `OpenCart is open source software and you are free to remove the powered by OpenCart`},
+		},
+	},
+	{
+		Name: `Bitrix (1C-Bitrix)`,
+		Fingerprints: []Fingerprint{
+			{Type: `header_key_value_contains`, Value: `Bitrix Site Manager`, Key: `X-Powered-CMS`},
+			{Type: `cookie_key_equals`, Value: `BITRIX_SM_GUEST_ID`},
+			{Type: `cookie_key_equals`, Value: `BITRIX_SM_LAST_VISIT`},
+			{Type: `header_key_value_contains`, Value: `policyref="/bitrix/p3p.xml"`, Key: `P3P`},
+		},
+	},
+	{
+		Name: `Jimdo`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name=\"generator\" content=\"Jimdo Creator.*\"\s*/?>`},
+			{Type: `regex`, Value: `https?://assets\.jimstatic\.com/`},
+			{Type: `header_key_equals`, Value: `X-Jimdo-Wid`},
+		},
+	},
+	{
+		Name: `Adobe Experience Manager`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `/etc.clientlibs/`},
+			{Type: `regex`, Value: `/etc\.clientlibs/(?:granite|foundation)/`},
+		},
+	},
+	{
+		Name: `Microsoft Word (generated HTML)`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name=\"Generator\" content=\"Microsoft Word.*\">`},
+		},
+	},
+	{
+		Name: `Contao`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name=\"generator\" content=\"Contao.*\"\s*/?>`},
+			{Type: `string_contains`, Value: `content="Contao Open Source CMS"`},
+			{Type: `header_key_equals`, Value: `Contao-Cache`},
+		},
+	},
+	{
+		Name: `IONOS MyWebsite`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `https?://(?:assets\.)?mywebsite-?editor\.com/`},
+			{Type: `regex`, Value: `https?://.*\.mywebsite-?builder\.com/`},
+			{Type: `header_key_value_contains`, Value: `https://*.mywebsite-editor.com`, Key: `Content-Security-Policy`},
+		},
+	},
+	{
+		Name: `Salesforce Experience Cloud`,
+		Fingerprints: []Fingerprint{
+			{Type: `string_contains`, Value: `LightningOutApp`},
+			{Type: `regex`, Value: `<meta name=\"generator\" content=\"Salesforce.*\"\s*/?>`},
+			{Type: `header_key_value_contains`, Value: `Salesforce.com`, Key: `Server`},
+		},
+	},
+	{
+		Name: `Mobirise`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name=\"generator\" content=\"Mobirise.*\"\s*/?>`},
+			{Type: `string_contains`, Value: `assets/mobirise/css/mbr-additional.css`},
+			{Type: `string_contains`, Value: `data-app-tag="mobirise"`},
+			{Type: `string_contains`, Value: `Site made with Mobirise Website Builder`},
+		},
+	},
+	{
+		Name: `Microsoft FrontPage`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name=\"GENERATOR\" content=\"Microsoft FrontPage.*\">`},
+			{Type: `string_contains`, Value: `content="Microsoft FrontPage`},
+			{Type: `string_contains`, Value: `content="FrontPage.Editor.Document"`},
+		},
+	},
+	{
+		Name: `Adobe Muse`,
+		Fingerprints: []Fingerprint{
+			{Type: `regex`, Value: `<meta name=\"generator\" content=\"Adobe Muse.*\"\s*/?>`},
+			{Type: `string_contains`, Value: `jquery.musemenu.js`},
+			{Type: `string_contains`, Value: `data-muse-uid=`},
+		},
+	},
+}
