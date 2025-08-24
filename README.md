@@ -30,15 +30,15 @@ Download a prebuilt binary for your OS/arch from the Releases page and put it on
 # pick the right asset from the release page
 tar -xzf cmsdetector_v1.0.0_linux_amd64.tar.gz
 chmod +x cmsdetector_v1.0.0_linux_amd64/cmsdetector
-sudo mv cmsdetector_v1.0.0_linux_amd64/cmsdetector /usr/local/bin/cmsdetector
-cmsdetector --help
+sudo mv cmsdetector_v1.0.0_linux_amd64/cmsdetector /usr/local/bin/cms_detector
+cms_detector --help
 ```
 
 #### Windows
 ```powershell
 Expand-Archive .\cmsdetector_V1.0.0_windows_amd64.zip -DestinationPath .
-Move-Item .\cmsdetector_V1.0.0_windows_amd64\cmsdetector.exe $Env:ProgramFiles\cmsdetector\cmsdetector.exe
-$Env:ProgramFiles\cmsdetector\cmsdetector.exe --help
+Move-Item .\cmsdetector_V1.0.0_windows_amd64\cmsdetector.exe $Env:ProgramFiles\cms_detector\cms_detector.exe
+$Env:ProgramFiles\cms_detector\cms_detector.exe --help
 ```
 
 ### 2) Install via go install (from the repo)
@@ -47,6 +47,9 @@ This builds and installs directly from the repo’s module path.
 go install github.com/joshuavanderpoll/CMS-Detector@latest
 # or use a specific version:
 go install github.com/joshuavanderpoll/CMS-Detector@v1.0.0
+
+# Usage
+~/go/bin/CMS-Detector --help
 ```
 
 ### 3) Build from source (clone & build)
