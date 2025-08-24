@@ -1,8 +1,8 @@
 # CMS-Detector
-A lightweight Python script to detect which **CMS or framework** a given website is running, based on HTTP response fingerprints.
+A lightweight fast Python script to detect which **CMS or framework** a given website is running, based on HTTP response fingerprints.
 
 ## ✨ Features
-- Detects 30+ CMS/frameworks (WordPress, Drupal, Shopify, Laravel, Wix, …).
+- Detects 60+ CMS/frameworks (WordPress, Drupal, Shopify, Laravel, Wix, …).
 - Multiple fingerprint methods:
     - HTML body regex & string search
     - HTTP headers
@@ -120,10 +120,19 @@ Output:
 - [x] [Adobe](https://www.adobe.com/products/dreamweaver.html)
 - [x] [Strato](https://strato.nl/)
 - [x] [Google](https://sites.google.com/)
-
-## 📅 Upcoming
-- [ ] [Duda](https://www.duda.co/)
-- [ ] [Salesforce](https://www.salesforce.com/)
+- [x] [Duda](https://www.duda.co/)
+- [x] [Nuxt.js](https://nuxt.com/)
+- [x] [OpenCart](https://www.opencart.com/)
+- [x] [Bitrix (1C-Bitrix)](https://www.1c-bitrix.ru/)
+- [x] [Jimdo](https://www.jimdo.com/)
+- [x] [Adobe Experience Manager](https://business.adobe.com/products/experience-manager/adobe-experience-manager.html)
+- [x] Microsoft Word (generated HTML)
+- [x] [Contao](https://contao.org/)
+- [x] [IONOS MyWebsite](https://www.ionos.com/websites/website-builder)
+- [x] Salesforce Experience Cloud
+- [x] [Mobirise](https://mobirise.com/)
+- [x] Microsoft FrontPage
+- [x] [Adobe Muse](https://www.adobe.com/wam/muse.html)
 
 ## 🔍 Fingerprint Types
 - `regex` → Match regex in HTML

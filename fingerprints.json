@@ -760,5 +760,235 @@
                 "value": "docs-prn\":\"Google Sites\""
             }
         ]
+    },
+    {
+        "name": "Duda",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "dmAPI.runOnReady("
+            },
+            {
+                "type": "string_contains",
+                "value": "dmAPI.getSiteName("
+            },
+            {
+                "type": "string_contains",
+                "value": "dmAPI.loadScript("
+            },
+            {
+                "type": "regex",
+                "value": "https?://(?:static|irp|lirp)\\.cdn-website\\.com/"
+            }
+        ]
+    },
+    {
+        "name": "Nuxt.js",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "id=\"__nuxt\""
+            },
+            {
+                "type": "string_contains",
+                "value": "/_nuxt/"
+            },
+            {
+                "type": "header_key_value_contains",
+                "key": "X-Powered-By",
+                "value": "Nuxt"
+            }
+        ]
+    },
+    {
+        "name": "OpenCart",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\\\"generator\\\" content=\\\"OpenCart.*\\\"\\s*/?>"
+            },
+            {
+                "type": "string_contains",
+                "value": "/image/catalog/opencart.ico"
+            },
+            {
+                "type": "cookie_key_equals",
+                "value": "OCSESSID"
+            },
+            {
+                "type": "string_contains",
+                "value": "OpenCart is open source software and you are free to remove the powered by OpenCart"
+            }
+        ]
+    },
+    {
+        "name": "Bitrix (1C-Bitrix)",
+        "fingerprints": [
+            {
+                "type": "header_key_value_contains",
+                "key": "X-Powered-CMS",
+                "value": "Bitrix Site Manager"
+            },
+            {
+                "type": "cookie_key_equals",
+                "value": "BITRIX_SM_GUEST_ID"
+            },
+            {
+                "type": "cookie_key_equals",
+                "value": "BITRIX_SM_LAST_VISIT"
+            },
+            {
+                "type": "header_key_value_contains",
+                "key": "P3P",
+                "value": "policyref=\"/bitrix/p3p.xml\""
+            }
+        ]
+    },
+    {
+        "name": "Jimdo",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\\\"generator\\\" content=\\\"Jimdo Creator.*\\\"\\s*/?>"
+            },
+            {
+                "type": "regex",
+                "value": "https?://assets\\.jimstatic\\.com/"
+            },
+            {
+                "type": "header_key_equals",
+                "value": "X-Jimdo-Wid"
+            }
+        ]
+    },
+    {
+        "name": "Adobe Experience Manager",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "/etc.clientlibs/"
+            },
+            {
+                "type": "regex",
+                "value": "/etc\\.clientlibs/(?:granite|foundation)/"
+            }
+        ]
+    },
+    {
+        "name": "Microsoft Word (generated HTML)",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\\\"Generator\\\" content=\\\"Microsoft Word.*\\\">"
+            }
+        ]
+    },
+    {
+        "name": "Contao",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\\\"generator\\\" content=\\\"Contao.*\\\"\\s*/?>"
+            },
+            {
+                "type": "string_contains",
+                "value": "content=\"Contao Open Source CMS\""
+            },
+            {
+                "type": "header_key_equals",
+                "value": "Contao-Cache"
+            }
+        ]
+    },
+    {
+        "name": "IONOS MyWebsite",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "https?://(?:assets\\.)?mywebsite-?editor\\.com/"
+            },
+            {
+                "type": "regex",
+                "value": "https?://.*\\.mywebsite-?builder\\.com/"
+            },
+            {
+                "type": "header_key_value_contains",
+                "key": "Content-Security-Policy",
+                "value": "https://*.mywebsite-editor.com"
+            }
+        ]
+    },
+    {
+        "name": "Salesforce Experience Cloud",
+        "fingerprints": [
+            {
+                "type": "string_contains",
+                "value": "LightningOutApp"
+            },
+            {
+                "type": "regex",
+                "value": "<meta name=\\\"generator\\\" content=\\\"Salesforce.*\\\"\\s*/?>"
+            },
+            {
+                "type": "header_key_value_contains",
+                "key": "Server",
+                "value": "Salesforce.com"
+            }
+        ]
+    },
+    {
+        "name": "Mobirise",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\\\"generator\\\" content=\\\"Mobirise.*\\\"\\s*/?>"
+            },
+            {
+                "type": "string_contains",
+                "value": "assets/mobirise/css/mbr-additional.css"
+            },
+            {
+                "type": "string_contains",
+                "value": "data-app-tag=\"mobirise\""
+            },
+            {
+                "type": "string_contains",
+                "value": "Site made with Mobirise Website Builder"
+            }
+        ]
+    },
+    {
+        "name": "Microsoft FrontPage",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\\\"GENERATOR\\\" content=\\\"Microsoft FrontPage.*\\\">"
+            },
+            {
+                "type": "string_contains",
+                "value": "content=\"Microsoft FrontPage"
+            },
+            {
+                "type": "string_contains",
+                "value": "content=\"FrontPage.Editor.Document\""
+            }
+        ]
+    },
+    {
+        "name": "Adobe Muse",
+        "fingerprints": [
+            {
+                "type": "regex",
+                "value": "<meta name=\\\"generator\\\" content=\\\"Adobe Muse.*\\\"\\s*/?>"
+            },
+            {
+                "type": "string_contains",
+                "value": "jquery.musemenu.js"
+            },
+            {
+                "type": "string_contains",
+                "value": "data-muse-uid="
+            }
+        ]
     }
 ]
