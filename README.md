@@ -14,21 +14,56 @@ A lightweight fast Go script to detect which **CMS or framework** a given websit
 - Works with both http:// and https:// targets.
 
 ## 📦 Installation
-- Prereq: Go 1.24+
+> Prereq: Go 1.24+ (for go install). For prebuilt binaries from Releases, no Go toolchain is required.
+
+### 1) Install from GitHub Releases (recommended)
+Download a prebuilt binary for your OS/arch from the Releases page and put it on your PATH.
+- **Releases**: https://github.com/joshuavanderpoll/CMS-Detector/releases
+- **Artifacts naming**: cmsdetector_<VERSION>_<GOOS>_<GOARCH>.(tar.gz|zip)<br>
+  Examples:
+  - cmsdetector_v1.0.0_linux_amd64.tar.gz
+  - cmsdetector_v1.0.0_darwin_arm64.tar.gz
+  - cmsdetector_V1.0.0_windows_amd64.zip
+
+#### Linux/macOS:
+```bash
+# pick the right asset from the release page
+tar -xzf cmsdetector_v1.0.0_linux_amd64.tar.gz
+chmod +x cmsdetector_v1.0.0_linux_amd64/cmsdetector
+sudo mv cmsdetector_v1.0.0_linux_amd64/cmsdetector /usr/local/bin/cmsdetector
+cmsdetector --help
+```
+
+#### Windows
+```powershell
+Expand-Archive .\cmsdetector_V1.0.0_windows_amd64.zip -DestinationPath .
+Move-Item .\cmsdetector_V1.0.0_windows_amd64\cmsdetector.exe $Env:ProgramFiles\cmsdetector\cmsdetector.exe
+$Env:ProgramFiles\cmsdetector\cmsdetector.exe --help
+```
+
+### 2) Install via go install (from the repo)
+This builds and installs directly from the repo’s module path.
+```bash
+go install github.com/joshuavanderpoll/CMS-Detector@latest
+# or use a specific version:
+go install github.com/joshuavanderpoll/CMS-Detector@v1.0.0
+```
+
+### 3) Build from source (clone & build)
 ```bash
 # Clone the repository
 git clone https://github.com/joshuavanderpoll/CMS-Detector.git
 cd CMS-Detector
 
 # Build the Go binary
-go build -o cmsdetector ./cms_detector.go
+go build -o cms_detector ./cms_detector.go
 ```
 
 ## 🚀 Usage
 
 ### Basic Scan
 ```bash
-./cmsdetector --host "https://wordpress.com"
+./cms_detector --host "https://wordpress.com"
 ```
 
 Output:
@@ -42,7 +77,7 @@ CMS Detector
 
 ### Raw Mode (Script friendly)
 ```bash
-./cmsdetector --host "https://wordpress.com" --raw
+./cms_detector --host "https://wordpress.com" --raw
 ```
 
 Output:
@@ -52,7 +87,7 @@ wordpress
 
 ### JSON output
 ```bash
-./cmsdetector --host "https://wordpress.com" --json
+./cms_detector --host "https://wordpress.com" --json
 ```
 
 Output:

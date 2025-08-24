@@ -1,5 +1,3 @@
-//go:build ignore
-
 package main
 
 import (
@@ -17,6 +15,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/joshuavanderpoll/CMS-Detector/fingerprints"
 )
 
 const (
@@ -80,14 +80,9 @@ func normalizeHost(h string) string {
 	return strings.TrimRight(h, "/")
 }
 
-func readFingerprints(path string) ([]CMS, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
+func readFingerprints() ([]CMS, error) {
 	var arr []CMS
-	dec := json.NewDecoder(f)
+	dec := json.NewDecoder(strings.NewReader(string(fingerprints.Data)))
 	if err := dec.Decode(&arr); err != nil {
 		return nil, err
 	}
@@ -369,16 +364,16 @@ func main() {
 
 	host = normalizeHost(host)
 
-	// Load fingerprints.json from current directory
-	rawFP, err := readFingerprints("./fingerprints.json")
+	// Load fingerprints
+	rawFP, err := readFingerprints()
 	if err != nil {
 		if jsonMode {
-			j := jsonOut{Host: host, Error: fmt.Sprintf("Could not read fingerprints.json: %v", err)}
+			j := jsonOut{Host: host, Error: fmt.Sprintf("Could not parse fingerprints: %v", err)}
 			enc := json.NewEncoder(os.Stdout)
 			enc.SetEscapeHTML(false)
 			_ = enc.Encode(j)
 		} else {
-			fmt.Println(RED + fmt.Sprintf("[!] Could not find \"fingerprints.json\": %v", err) + END)
+			fmt.Println(RED + fmt.Sprintf("[!] Could not parse fingerprints: %v", err) + END)
 		}
 		os.Exit(1)
 	}

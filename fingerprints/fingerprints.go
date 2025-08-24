@@ -1,4 +1,6 @@
-[
+package fingerprints
+
+var Data = []byte(`[
     {
         "name": "WordPress",
         "fingerprints": [
@@ -486,7 +488,7 @@
             },
             {
                 "type": "header_key_equals",
-                "key": "x-vercel-cache"
+                "value": "x-vercel-cache"
             },
             {
                 "type": "string_contains",
@@ -554,7 +556,7 @@
         "fingerprints": [
             {
                 "type": "header_key_equals",
-                "key": "x-umbraco-version"
+                "value": "x-umbraco-version"
             },
             {
                 "type": "string_contains",
@@ -608,31 +610,31 @@
             },
             {
                 "type": "header_key_equals",
-                "key": "x-hs-cache-config"
+                "value": "x-hs-cache-config"
             },
             {
                 "type": "header_key_equals",
-                "key": "x-hs-cf-cache-control"
+                "value": "x-hs-cf-cache-control"
             },
             {
                 "type": "header_key_equals",
-                "key": "x-hs-cf-cache-status"
+                "value": "x-hs-cf-cache-status"
             },
             {
                 "type": "header_key_equals",
-                "key": "x-hs-cfworker-meta"
+                "value": "x-hs-cfworker-meta"
             },
             {
                 "type": "header_key_equals",
-                "key": "x-hs-content-id"
+                "value": "x-hs-content-id"
             },
             {
                 "type": "header_key_equals",
-                "key": "x-hs-hub-id"
+                "value": "x-hs-hub-id"
             },
             {
                 "type": "header_key_equals",
-                "key": "x-hs-prerendered"
+                "value": "x-hs-prerendered"
             },
             {
                 "type": "regex",
@@ -982,4 +984,4 @@
             }
         ]
     }
-]
+]`)

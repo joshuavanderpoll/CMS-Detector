@@ -75,14 +75,13 @@ jobs:
           VERSION="${GITHUB_REF_NAME:-dev}"
 
           # Build (static)
-          CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o "${APP_NAME}${EXT}" ./cms_detector.go
+          CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o "${APP_NAME}${EXT}" .
 
           # Package dir
           PKG="${APP_NAME}_${VERSION}_${GOOS}_${GOARCH}"
           mkdir -p "${PKG}"
           mv "${APP_NAME}${EXT}" "${PKG}/"
-          # Include runtime data & docs if present
-          [ -f fingerprints.json ] && cp fingerprints.json "${PKG}/"
+          # Include docs if present
           [ -f README.md ] && cp README.md "${PKG}/"
           [ -f LICENSE ] && cp LICENSE "${PKG}/"
 
