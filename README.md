@@ -1,5 +1,5 @@
 # CMS-Detector
-A lightweight fast Python script to detect which **CMS or framework** a given website is running, based on HTTP response fingerprints.
+A lightweight fast Go script to detect which **CMS or framework** a given website is running, based on HTTP response fingerprints.
 
 ## ✨ Features
 - Detects 60+ CMS/frameworks (WordPress, Drupal, Shopify, Laravel, Wix, …).
@@ -14,25 +14,21 @@ A lightweight fast Python script to detect which **CMS or framework** a given we
 - Works with both http:// and https:// targets.
 
 ## 📦 Installation
+- Prereq: Go 1.24+
 ```bash
 # Clone the repository
 git clone https://github.com/joshuavanderpoll/CMS-Detector.git
 cd CMS-Detector
 
-# Create & activate a virtual environment
-python3 -m venv .venv
-source .venv/bin/activate   # Linux/Mac or '. .venv/bin/activate'
-.venv\Scripts\activate      # Windows PowerShell
-
-# Install dependencies
-pip install -r requirements.txt
+# Build the Go binary
+go build -o cmsdetector ./cms_detector.go
 ```
 
 ## 🚀 Usage
 
 ### Basic Scan
 ```bash
-python3 cms_detector.py --host "https://wordpress.com"
+./cmsdetector --host "https://wordpress.com"
 ```
 
 Output:
@@ -46,7 +42,7 @@ CMS Detector
 
 ### Raw Mode (Script friendly)
 ```bash
-python3 cms_detector.py --host "https://wordpress.com" --raw
+./cmsdetector --host "https://wordpress.com" --raw
 ```
 
 Output:
@@ -56,12 +52,12 @@ wordpress
 
 ### JSON output
 ```bash
-python3 cms_detector.py --host "https://wordpress.com" --json
+./cmsdetector --host "https://wordpress.com" --json
 ```
 
 Output:
 ```json
-{"host": "https://wordpress.com", "status_code": 200, "detected": true, "matches": [{"name": "WordPress", "matched_by": ["string_contains:/wp-content/"]}], "timing_ms": 192, "redirects": 0}
+{"host":"https://wordpress.com","status_code":200,"detected":true,"matches":[{"name":"WordPress","matched_by":["string_contains:/wp-content/"]}],"timing_ms":188,"redirects":0}
 ```
 
 ## ⚡ Options

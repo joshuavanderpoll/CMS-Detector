@@ -485,9 +485,8 @@
                 "value": "x-vercel-id"
             },
             {
-                "type": "header_key_value_contains",
-                "key": "x-vercel-cache",
-                "value": ""
+                "type": "header_key_equals",
+                "key": "x-vercel-cache"
             },
             {
                 "type": "string_contains",
@@ -554,9 +553,8 @@
         "name": "Umbraco",
         "fingerprints": [
             {
-                "type": "header_key_value_contains",
-                "key": "x-umbraco-version",
-                "value": ""
+                "type": "header_key_equals",
+                "key": "x-umbraco-version"
             },
             {
                 "type": "string_contains",
@@ -609,39 +607,32 @@
                 "value": "HubSpot"
             },
             {
-                "type": "header_key_value_contains",
-                "key": "x-hs-cache-config",
-                "value": ""
+                "type": "header_key_equals",
+                "key": "x-hs-cache-config"
             },
             {
-                "type": "header_key_value_contains",
-                "key": "x-hs-cf-cache-control",
-                "value": ""
+                "type": "header_key_equals",
+                "key": "x-hs-cf-cache-control"
             },
             {
-                "type": "header_key_value_contains",
-                "key": "x-hs-cf-cache-status",
-                "value": ""
+                "type": "header_key_equals",
+                "key": "x-hs-cf-cache-status"
             },
             {
-                "type": "header_key_value_contains",
-                "key": "x-hs-cfworker-meta",
-                "value": ""
+                "type": "header_key_equals",
+                "key": "x-hs-cfworker-meta"
             },
             {
-                "type": "header_key_value_contains",
-                "key": "x-hs-content-id",
-                "value": ""
+                "type": "header_key_equals",
+                "key": "x-hs-content-id"
             },
             {
-                "type": "header_key_value_contains",
-                "key": "x-hs-hub-id",
-                "value": ""
+                "type": "header_key_equals",
+                "key": "x-hs-hub-id"
             },
             {
-                "type": "header_key_value_contains",
-                "key": "x-hs-prerendered",
-                "value": ""
+                "type": "header_key_equals",
+                "key": "x-hs-prerendered"
             },
             {
                 "type": "regex",
