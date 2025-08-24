@@ -54,7 +54,7 @@ Output:
 wordpress
 ```
 
-###JSON output
+### JSON output
 ```bash
 python3 cms_detector.py --host "https://wordpress.com" --json
 ```
@@ -75,43 +75,55 @@ Output:
 | `--ua`       | Custom User-Agent string                                |
 
 ## ✅ Supported CMS / Frameworks
-- [x] <a href="https://laravel.com/" target="_blank">Laravel</a>
-- [x] <a href="https://wordpress.com/" target="_blank">WordPress</a>
-- [x] <a href="https://www.drupal.org/" target="_blank">Drupal</a>
-- [x] <a href="https://www.lightspeedhq.nl/" target="_blank">Lightspeed</a>
-- [x] <a href="https://www.shopify.com/" target="_blank">Shopify</a>
-- [x] <a href="https://www.prestashop.com/" target="_blank">PrestaShop</a>
-- [x] <a href="https://www.squarespace.com/" target="_blank">Squarespace</a>
-- [x] <a href="https://www.sanity.io/" target="_blank">Sanity</a>
-- [x] <a href="https://wix.com/" target="_blank">Wix</a>
-- [x] <a href="https://nextjs.org/" target="_blank">Next.js</a>
-- [x] <a href="https://dotnet.microsoft.com/en-us/apps/aspnet" target="_blank">Microsoft ASP</a>
-- [x] <a href="https://jouwweb.nl/" target="_blank">JouwWeb</a>
-- [x] <a href="https://magento.com/" target="_blank">Magento</a>
-- [x] <a href="https://www.weebly.com/" target="_blank">Weebly</a>
-- [x] <a href="https://www.joomla.org/" target="_blank">Joomla</a>
-- [x] <a href="https://www.blogger.com/" target="_blank">Blogger</a>
-- [x] <a href="https://www.silverstripe.org/" target="_blank">SilverStripe CMS</a>
+- [x] [Laravel](https://laravel.com/)
+- [x] [WordPress](https://wordpress.com/)
+- [x] [Drupal](https://www.drupal.org/)
+- [x] [Lightspeed](https://www.lightspeedhq.nl/)
+- [x] [Shopify](https://www.shopify.com/)
+- [x] [PrestaShop](https://www.prestashop.com/)
+- [x] [Squarespace](https://www.squarespace.com/)
+- [x] [Sanity](https://www.sanity.io/)
+- [x] [Wix](https://wix.com/)
+- [x] [Next](https://nextjs.org/)
+- [x] [Microsoft](https://dotnet.microsoft.com/en-us/apps/aspnet)
+- [x] [JouwWeb](https://jouwweb.nl/)
+- [x] [Magento](https://magento.com/)
+- [x] [Weebly](https://www.weebly.com/)
+- [x] [Joomla](https://www.joomla.org/)
+- [x] [Blogger](https://www.blogger.com/)
+- [x] [SilverStripe](https://www.silverstripe.org/)
 - [x] Icordis CMS
-- [x] <a href="https://sulu.io/" target="_blank">Sulu CMS</a>
-- [x] <a href="https://www.gatsbyjs.com/" target="_blank">Gatsby</a>
-- [x] <a href="https://webflow.com/" target="_blank">Webflow</a>
-- [x] <a href="https://www.zendesk.nl/" target="_blank">Zendesk</a>
-- [x] <a href="https://www.djangoproject.com/" target="_blank">Django</a>
-- [x] <a href="https://www.coremedia.com/" target="_blank">CoreMedia CMS</a>
-- [x] <a href="https://processwire.com/" target="_blank">ProcessWire CMS</a>
-- [x] <a href="https://typo3.org/" target="_blank">TYPO3</a>
-- [x] <a href="https://bloxcms.com/" target="_blank">Blox CMS</a>
-- [x] <a href="https://www.odoo.com/" target="_blank">Odoo</a>
-- [x] <a href="https://www.netlify.com/" target="_blank">Netifly</a>
+- [x] [Sulu](https://sulu.io/)
+- [x] [Gatsby](https://www.gatsbyjs.com/)
+- [x] [Webflow](https://webflow.com/)
+- [x] [Zendesk](https://www.zendesk.nl/)
+- [x] [Django](https://www.djangoproject.com/)
+- [x] [CoreMedia](https://www.coremedia.com/)
+- [x] [ProcessWire](https://processwire.com/)
+- [x] [TYPO3](https://typo3.org/)
+- [x] [Blox](https://bloxcms.com/)
+- [x] [Odoo](https://www.odoo.com/)
+- [x] [Netifly](https://www.netlify.com/)
+- [x] [Amazon S3 (Static Website)](https://aws.amazon.com/)
+- [x] [Vercel](https://vercel.com/solutions/web-apps)
+- [x] [GitHub Pages](https://docs.github.com/en/pages)
+- [x] [Ghost](https://ghost.org/)
+- [x] [Craft CMS](https://craftcms.com/)
+- [x] [Umbraco](https://umbraco.com/)
+- [x] [Sitecore](https://www.sitecore.com/)
+- [x] [Strapi](https://strapi.io/)
+- [x] [HubSpot CMS](https://www.hubspot.com/products/cms)
+- [x] [BigCommerce](https://www.bigcommerce.nl/)
+- [x] [Tilda](https://tilda.cc/)
+- [x] [Webnode](https://www.webnode.com/)
+- [x] [GoDaddy](https://www.godaddy.com/)
+- [x] [Adobe](https://www.adobe.com/products/dreamweaver.html)
+- [x] [Strato](https://strato.nl/)
+- [x] [Google](https://sites.google.com/)
 
 ## 📅 Upcoming
-- [ ] <a href="https://www.duda.co/" target="_blank">Duda</a>
-- [ ] <a href="https://www.godaddy.com/" target="_blank">GoDaddy</a>
-- [ ] <a href="https://www.adobe.com/products/dreamweaver.html" target="_blank">Adobe Dreamweaver</a>
-- [ ] <a href="https://strato.nl/" target="_blank">Strato Website</a>
-- [ ] <a href="https://sites.google.com/" target="_blank">Google Sites</a>
-- [ ] <a href="https://www.salesforce.com/" target="_blank">Salesforce</a>
+- [ ] [Duda](https://www.duda.co/)
+- [ ] [Salesforce](https://www.salesforce.com/)
 
 ## 🔍 Fingerprint Types
 - `regex` → Match regex in HTML
