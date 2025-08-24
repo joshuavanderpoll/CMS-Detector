@@ -1,28 +1,80 @@
 # CMS-Detector
-A Python script to detect CMS fingerprints of a specific website.
+A lightweight Python script to detect which **CMS or framework** a given website is running, based on HTTP response fingerprints.
 
-## Installation
+## ✨ Features
+- Detects 30+ CMS/frameworks (WordPress, Drupal, Shopify, Laravel, Wix, …).
+- Multiple fingerprint methods:
+    - HTML body regex & string search
+    - HTTP headers
+    - Cookies (including Base64/JSON decoding)
+- CLI modes:
+    - Standard (colorful output)
+    - Raw (--raw) → just the CMS name (script-friendly)
+    - JSON (--json) → structured output
+- Works with both http:// and https:// targets.
+
+## 📦 Installation
 ```bash
-$ pip3 install virtualenv
-$ virtualenv -p python3 .venv
-$ source .venv/bin/activate
-$ pip3 install -r requirements.txt
-$ python3 cms_detector.py -h
+# Clone the repository
+git clone https://github.com/joshuavanderpoll/CMS-Detector.git
+cd CMS-Detector
+
+# Create & activate a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate   # Linux/Mac or '. .venv/bin/activate'
+.venv\Scripts\activate      # Windows PowerShell
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-## Usage
+## 🚀 Usage
+
+### Basic Scan
 ```bash
-$ python3 cms_detector.py --host="https://wordpress.com"
-CMS Detector script
+python3 cms_detector.py --host "https://wordpress.com"
+```
+
+Output:
+```
+CMS Detector
 [•] Made by: https://github.com/joshuavanderpoll/CMS-Detector
 [@] Scanning host "https://wordpress.com"...
 [√] "https://wordpress.com" is using "WordPress"!
+    ↳ matched by: string_contains:/wp-content/
+```
 
-$ python3 cms_detector.py --host="https://wordpress.com" --raw
+### Raw Mode (Script friendly)
+```bash
+python3 cms_detector.py --host "https://wordpress.com" --raw
+```
+
+Output:
+```
 wordpress
 ```
 
-## Support
+###JSON output
+```bash
+python3 cms_detector.py --host "https://wordpress.com" --json
+```
+
+Output:
+```json
+{"host": "https://wordpress.com", "status_code": 200, "detected": true, "matches": [{"name": "WordPress", "matched_by": ["string_contains:/wp-content/"]}], "timing_ms": 192, "redirects": 0}
+```
+
+## ⚡ Options
+| Option       | Description                                             |
+| ------------ | ------------------------------------------------------- |
+| `--host`     | Target host (e.g. `example.com`, `https://example.com`) |
+| `--raw`      | Print only CMS name(s) in lowercase (e.g. `wordpress`)  |
+| `--json`     | Return structured JSON output                           |
+| `--timeout`  | Set request timeout (default: 10s)                      |
+| `--insecure` | Disable SSL verification (`verify=False`)               |
+| `--ua`       | Custom User-Agent string                                |
+
+## ✅ Supported CMS / Frameworks
 - [x] <a href="https://laravel.com/" target="_blank">Laravel</a>
 - [x] <a href="https://wordpress.com/" target="_blank">WordPress</a>
 - [x] <a href="https://www.drupal.org/" target="_blank">Drupal</a>
@@ -53,7 +105,7 @@ wordpress
 - [x] <a href="https://www.odoo.com/" target="_blank">Odoo</a>
 - [x] <a href="https://www.netlify.com/" target="_blank">Netifly</a>
 
-## Upcoming
+## 📅 Upcoming
 - [ ] <a href="https://www.duda.co/" target="_blank">Duda</a>
 - [ ] <a href="https://www.godaddy.com/" target="_blank">GoDaddy</a>
 - [ ] <a href="https://www.adobe.com/products/dreamweaver.html" target="_blank">Adobe Dreamweaver</a>
@@ -61,15 +113,15 @@ wordpress
 - [ ] <a href="https://sites.google.com/" target="_blank">Google Sites</a>
 - [ ] <a href="https://www.salesforce.com/" target="_blank">Salesforce</a>
 
-## Fingerprint types
-- "regex" = Checks regex match in HTML (value=search value)
-- "string_contains" = Check HTML if contains value (value=search value)
-- "header_key_equals" = Checks for header key (value=match key value)
-- "header_key_value" = Checks header key and value match (key=match key value, value=match value)
-- "header_key_value_contains" = Checks if header key contains value (key=match key value, value=search value)
-- "cookie_key_equals" = Checks for cookie key (value=match key value)
-- "cookie_key_value" = Checks cookie key and value match (key=match key value, value=match value)
-- "cookie_key_value_contains" = Checks if cookie key contains value (key=match key value, value=search value)
-- "cookie_key_value_b64_json_keys" = Checks header key and value its keys after decoding from Base64 and JSON  (key=match key value, value=required keys seperated by |)
-- "cookie_substr_key_value_b64_type" = Checks part of header key and value type after decoding from Base64 (length=cut length integer, key=match cut key value, value=match type value)
-- "strings_contain" = Check HTML from multiple strings (value=required strings seperated by |)
+## 🔍 Fingerprint Types
+- `regex` → Match regex in HTML
+- `string_contains` → HTML contains substring
+- `strings_contain` → HTML contains all substrings (pipe-separated)
+- `header_key_equals` → Header key exists
+- `header_key_value` → Header key/value match
+- `header_key_value_contains` → Header key’s value contains substring
+- `cookie_key_equals` → Cookie key exists
+- `cookie_key_value` → Cookie key/value match
+- `cookie_key_value_contains` → Cookie value contains substring
+- `cookie_key_value_b64_json_keys` → Decode cookie from Base64 → JSON → check for keys
+- `cookie_substr_key_value_b64_type` → Check cookie name suffix, decode Base64, verify value type

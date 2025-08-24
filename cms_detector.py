@@ -1,15 +1,20 @@
-import requests
+#!/usr/bin/env python3
+# pylint: disable=line-too-long, broad-exception-caught
+""" Detect CMS/frameworks using lightweight HTTP heuristics."""
+
 import argparse
-import json
 import base64
-import urllib.parse
-import urllib3
-import re
-import os
 import binascii
-import readline
+import json
+import os
+import re
+import sys
+import urllib.parse
 
+import requests
+import urllib3
 
+# ANSI colors (preserved from your original)
 PURPLE = '\033[95m'
 CYAN = '\033[96m'
 DARKCYAN = '\033[36m'
@@ -22,177 +27,284 @@ UNDERLINE = '\033[4m'
 END = '\033[0m'
 
 
-class CMSDetector:
-    def __init__(self, host, raw=False) -> None:
-        self.session = requests.session()
-        self.host = host
-        self.fingerprints = []
-        self.raw = raw
+class FingerprintMatcher:
+    """
+    Prepares and evaluates fingerprints efficiently.
+    Compiles regexes and normalizes values for faster matching.
+    """
+    def __init__(self, fingerprints):
+        # Pre-compile regex patterns and keep structure as-is for other types
+        self.cms_list = []
+        for cms in fingerprints:
+            prepared = []
+            for fp in cms.get("fingerprints", []):
+                fptype = fp.get("type")
+                if fptype == "regex":
+                    pattern = fp.get("value", "")
+                    try:
+                        compiled = re.compile(pattern, re.IGNORECASE | re.DOTALL)
+                    except re.error:
+                        continue
+                    prepared.append({"type": "regex", "compiled": compiled, "raw": pattern})
+                else:
+                    prepared.append(fp)
+            self.cms_list.append({"name": cms.get("name", "Unknown"), "fingerprints": prepared})
 
-        self.load_fingerprints()
-        self.scan_cms()
+    def match(self, response: requests.Response, response_text_lower: str):
+        """
+        Returns list of dicts: {"name": <cms>, "matched_by": [<description>...]}
+        """
+        results = []
 
+        headers = response.headers
+        cookies = response.cookies
 
-    def load_fingerprints(self):
-        if os.path.exists("./fingerprints.json"):
-            with open("./fingerprints.json", "r") as f:
-                self.fingerprints = json.loads(f.read())
-        else:
-            print(f"{RED}[!] Could not find \"fingerprints.json\".")
-            exit(1)
+        for cms in self.cms_list:
+            matched_by = []
+            for frpr in cms["fingerprints"]:
+                t = frpr.get("type")
 
+                # Body regex
+                if t == "regex":
+                    if frpr["compiled"].search(response_text_lower):
+                        matched_by.append(f"regex:{frpr['raw']}")
 
-    def scan_cms(self):
-        if not self.raw:
-            print(f"{BLUE}[@] Scanning host {DARKCYAN}\"{self.host}\"{BLUE}...")
+                # Body contains
+                elif t == "string_contains":
+                    value = str(frpr.get("value", "")).lower()
+                    if value and value in response_text_lower:
+                        matched_by.append(f"string_contains:{frpr['value']}")
 
-        try:
-            response = self.session.get(self.host, headers={
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
-                "Cache-Control": "max-age=0",
-                "sec-ch-ua": "\"Chromium\";v=\"106\", \"Google Chrome\";v=\"106\", \"Not;A=Brand\";v=\"99\"",
-                "sec-ch-ua-mobile": "?0",
-                "sec-ch-ua-platform": "\"macOS\"",
-                "sec-fetch-dest": "iframe",
-                "sec-fetch-mode": "navigate",
-                "sec-fetch-site": "same-site",
-                "upgrade-insecure-requests": "1",
-                "referer": self.host
-            }, verify=False)
-        except Exception as e:
-            print(f"{RED}[!] Could not retrieve host. Error: ", e)
-            exit(1)
+                elif t == "strings_contain":
+                    required_values = str(frpr.get("value", "")).lower().split("|")
+                    if required_values and all(v in response_text_lower for v in required_values):
+                        matched_by.append(f"strings_contain:{frpr['value']}")
 
-        self.match_response(response)
+                # Header checks
+                elif t == "header_key_equals":
+                    key = frpr.get("value", "")
+                    if key and key in headers:
+                        matched_by.append(f"header_key_equals:{key}")
 
+                elif t == "header_key_value":
+                    key = frpr.get("key", "")
+                    value = str(frpr.get("value", "")).lower()
+                    if key in headers and str(headers.get(key, "")).lower() == value:
+                        matched_by.append(f"header_key_value:{key}={frpr['value']}")
 
-    def match_response(self, response: requests.Response):
-        response_text = response.text.lower().replace("'", "\"").strip()
+                elif t == "header_key_value_contains":
+                    key = frpr.get("key", "")
+                    value = str(frpr.get("value", "")).lower()
+                    if key in headers and value in str(headers.get(key, "")).lower():
+                        matched_by.append(f"header_key_value_contains:{key}~{frpr['value']}")
 
-        for cms in self.fingerprints:
-            match = False
-            for frpr in cms['fingerprints']:
+                # Cookie checks
+                elif t == "cookie_key_equals":
+                    key = frpr.get("value", "")
+                    if key and key in cookies:
+                        matched_by.append(f"cookie_key_equals:{key}")
 
-                # Regex match
-                if frpr['type'] == 'regex':
-                    if re.search(frpr['value'], response_text, re.IGNORECASE):
-                        match = True
-                        break
+                elif t == "cookie_key_value":
+                    key = frpr.get("key", "")
+                    value = str(frpr.get("value", "")).lower()
+                    if key in cookies and str(cookies.get(key, "")).lower() == value:
+                        matched_by.append(f"cookie_key_value:{key}={frpr['value']}")
 
-                # Check if body contains string
-                if frpr['type'] == 'string_contains':
-                    if str(frpr['value']).lower() in response_text:
-                        match = True
-                        break
+                elif t == "cookie_key_value_contains":
+                    key = frpr.get("key", "")
+                    value = str(frpr.get("value", "")).lower()
+                    if key in cookies and value in str(cookies.get(key, "")).lower():
+                        matched_by.append(f"cookie_key_value_contains:{key}~{frpr['value']}")
 
-                # Check if body contains string
-                if frpr['type'] == 'strings_contain':
-                    required_values = str(frpr['value']).lower().split("|")
-
-                    if all(substring in response_text for substring in required_values):
-                        match = True
-                        break
-
-                # Check if header key exists
-                if frpr['type'] == 'header_key_equals':
-                    if frpr['value'] in response.headers:
-                        match = True
-                        break
-
-                # Check if header key/value exists
-                if frpr['type'] == 'header_key_value':
-                    if frpr['key'] in response.headers and str(response.headers[frpr['key']]).lower() == str(frpr['value']).lower():
-                        match = True
-                        break
-
-                # Check if header key contains string in value
-                if frpr['type'] == 'header_key_value_contains':
-                    if frpr['key'] in response.headers and str(frpr['value']).lower() in str(response.headers[frpr['key']]).lower():
-                        match = True
-                        break
-
-                # Check if cookie key exists
-                if frpr['type'] == 'cookie_key_equals':
-                    if frpr['value'] in response.cookies:
-                        match = True
-                        break
-
-                # Check if cookie key/value exists
-                if frpr['type'] == 'cookie_key_value':
-                    if frpr['key'] in response.cookies and str(response.cookies[frpr['key']]).lower() == str(frpr['value']).lower():
-                        match = True
-                        break
-
-                # Check if cookie key contains string in value
-                if frpr['type'] == 'cookie_key_value_contains':
-                    if frpr['key'] in response.cookies and str(frpr['value']).lower() in str(response.cookies[frpr['key']]).lower():
-                        match = True
-                        break
-
-                # # Check if cookie key/value its keys after decoding
-                if frpr['type'] == 'cookie_key_value_b64_json_keys':
-                    required_keys = str(frpr['value']).lower().split("|")
-
-                    if frpr['key'] in response.cookies:
+                elif t == "cookie_key_value_b64_json_keys":
+                    key = frpr.get("key", "")
+                    required_keys = str(frpr.get("value", "")).lower().split("|")
+                    if key in cookies:
                         try:
-                            url_decoded = urllib.parse.unquote(response.cookies[frpr['key']])
+                            url_decoded = urllib.parse.unquote(cookies.get(key, ""))
                             b64_decoded = base64.b64decode(url_decoded)
                             json_decoded = json.loads(b64_decoded)
 
-                            if all(key in json_decoded for key in required_keys):
-                                match = True
-                                break
-                        except (binascii.Error, json.decoder.JSONDecodeError):
+                            json_keys_lower = {str(k).lower() for k in json_decoded.keys()}
+                            if all(k in json_keys_lower for k in required_keys):
+                                matched_by.append(f"cookie_key_value_b64_json_keys:{key} has {frpr['value']}")
+                        except (binascii.Error, json.decoder.JSONDecodeError, ValueError, TypeError):
                             pass
 
-                # Checks end of header key and value type after decoding from Base64
-                if frpr['type'] == 'cookie_substr_key_value_b64_type':
-                    for cookie in response.cookies:
-                        if cookie.name[frpr['length']:] == frpr['key']:
-                            try:
-                                url_decoded = urllib.parse.unquote(cookie.value)
-                                b64_decoded = base64.b64decode(url_decoded)
+                elif t == "cookie_substr_key_value_b64_type":
+                    end_len = int(frpr.get("length", 0))
+                    key_suffix = frpr.get("key", "")
+                    expected_type_name = frpr.get("value", "")
+                    try:
+                        for cookie in cookies:
+                            if cookie.name[end_len:] == key_suffix:
+                                try:
+                                    url_decoded = urllib.parse.unquote(cookie.value)
+                                    b64_decoded = base64.b64decode(url_decoded)
+                                    if type(b64_decoded).__name__ == expected_type_name:
+                                        matched_by.append(
+                                            f"cookie_substr_key_value_b64_type:*{key_suffix} -> {expected_type_name}"
+                                        )
+                                        break
+                                except binascii.Error:
+                                    continue
+                    except Exception:
+                        pass
 
-                                if type(b64_decoded).__name__ == frpr['value']:
-                                    match = True
-                                    break
-                            except (binascii.Error):
-                                pass
+            if matched_by:
+                results.append({"name": cms["name"], "matched_by": matched_by})
 
-            if match:
-                if not self.raw:
-                    print(f"{GREEN}[√] \"{self.host}\" is using {BLUE}\"{cms['name']}\"{GREEN}!")
-                else:
-                    print(GREEN + str(cms['name']).lower().replace(" ", "_"))
-                return
+        return results
 
-        if not self.raw:
-            print("[!] No CMS could be detected.")
+
+class CMSDetector:
+    """ CMS Detector """
+
+    def __init__(self, host: str, *, raw: bool = False, json_out: bool = False, insecure: bool = False, timeout: int = 10, user_agent: str | None = None):
+        self.session = requests.Session()
+        self.host = self._normalize_host(host)
+        self.raw = raw
+        self.json_out = json_out
+        self.insecure = insecure
+        self.timeout = timeout
+        self.user_agent = user_agent or "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+
+        self._headers = {
+            "User-Agent": self.user_agent,
+            "Cache-Control": "max-age=0",
+            "sec-ch-ua": "\"Chromium\";v=\"126\", \"Google Chrome\";v=\"126\", \"Not;A=Brand\";v=\"99\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "upgrade-insecure-requests": "1",
+            "referer": self.host
+        }
+
+        self.fingerprints = self._load_fingerprints()
+        self.matcher = FingerprintMatcher(self.fingerprints)
+
+
+    @staticmethod
+    def _normalize_host(host: str) -> str:
+        host = (host or "").strip()
+        if not host.startswith(("http://", "https://")):
+            host = f"http://{host}"
+        # remove trailing slash
+        return host.rstrip("/")
+
+
+    @staticmethod
+    def _load_fingerprints():
+        fp_path = os.path.join(".", "fingerprints.json")
+        if os.path.exists(fp_path):
+            with open(fp_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        print(f'{RED}[!] Could not find "fingerprints.json".{END}')
+        sys.exit(1)
+
+
+    def scan(self):
+        """ Scan host for CMS """
+        if not (self.raw or self.json_out):
+            print(PURPLE + BOLD + "CMS Detector" + END)
+            print(PURPLE + "[•] Made by: https://github.com/joshuavanderpoll/CMS-Detector" + END)
+            print(f"{BLUE}[@] Scanning host {DARKCYAN}\"{self.host}\"{BLUE}...{END}")
+
+        try:
+            resp = self.session.get(
+                self.host,
+                headers=self._headers,
+                allow_redirects=True,
+                timeout=self.timeout,
+                verify=not self.insecure,
+            )
+        except requests.exceptions.RequestException as e:
+            msg = f"{RED}[!] Could not retrieve host. Error: {e}{END}"
+            if self.json_out:
+                print(json.dumps({"host": self.host, "error": str(e)}, ensure_ascii=False))
+            else:
+                print(msg)
+            sys.exit(1)
+
+        body_lower = resp.text.lower().replace("'", "\"").strip()
+        matches = self.matcher.match(resp, body_lower)
+        detected = bool(matches)
+
+        if self.json_out:
+            out = {
+                "host": self.host,
+                "status_code": resp.status_code,
+                "detected": detected,
+                "matches": matches,
+                "timing_ms": int(resp.elapsed.total_seconds() * 1000) if resp.elapsed else None,
+                "redirects": len(resp.history),
+            }
+            print(json.dumps(out, ensure_ascii=False))
+        elif self.raw:
+            if detected:
+                # print all matched
+                for m in matches:
+                    print(GREEN + m["name"].lower().replace(" ", "_") + END)
+            else:
+                print("null")
         else:
-            print('null')
-            
+            if detected:
+                names = ", ".join(f"\"{m['name']}\"" for m in matches)
+                print(f"{GREEN}[√] \"{self.host}\" is using {BLUE}{names}{GREEN}!{END}")
+                for m in matches:
+                    # Show a concise reason for each CMS
+                    reasons = "; ".join(m["matched_by"][:3])
+                    if len(m["matched_by"]) > 3:
+                        reasons += f" (+{len(m['matched_by'])-3} more)"
+                    print(f"{CYAN}    ↳ matched by: {reasons}{END}")
+            else:
+                print(f"{YELLOW}[!] No CMS could be detected.{END}")
 
-if __name__ == "__main__":
-    # Disable SSL warnings
+        # Exit codes: 0=found, 2=no match
+        sys.exit(0 if detected else 2)
+
+
+def main():
+    """ CLI entry point """
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    # Arguments
-    parser = argparse.ArgumentParser(prog = 'CMS Detector', description = 'What the program does', epilog = 'Created by: https://github.com/joshuavanderpoll')
-    parser.add_argument('--host', default=None, type=str)
-    parser.add_argument('--raw', default=False, action='store_true', help="Returns only the result (null = No result)")
+    parser = argparse.ArgumentParser(
+        prog="CMS Detector",
+        description="Detect common CMS/frameworks using lightweight HTTP heuristics.",
+        epilog="Created by: https://github.com/joshuavanderpoll"
+    )
+    parser.add_argument('--host', type=str, help="Host or URL to scan (e.g., example.com or https://example.com)")
+    parser.add_argument('--raw', default=False, action='store_true', help="Print only result name(s) in lowercase with underscores; print 'null' on no match.")
+    parser.add_argument('--json', dest='json_out', default=False, action='store_true', help="Output a structured JSON result.")
+    parser.add_argument('--timeout', type=int, default=10, help="HTTP timeout in seconds (default: 10).")
+    parser.add_argument('--insecure', default=False, action='store_true', help="Skip TLS verification (verify=False).")
+    parser.add_argument('--ua', dest='user_agent', type=str, default=None, help="Custom User-Agent string.")
+
     args = parser.parse_args()
 
-    # Credits
-    if not args.raw:
-        print(PURPLE + BOLD + "CMS Detector script")
-        print(END + PURPLE + "[•] Made by: https://github.com/joshuavanderpoll/CMS-Detector" + RED)
+    # Interactive prompt fallback (preserved)
+    host = args.host
+    if host is None and not args.json_out and not args.raw:
+        host = input(PURPLE + "[?] Enter host to scan : " + END)
 
-    if args.host == None:
-        args.host = input(PURPLE + "[?] Enter host to scan : " + END)
+    elif host is None:
+        # If --json or --raw and no host provided, fail cleanly
+        print(json.dumps({"error": "Missing --host"}, ensure_ascii=False) if args.json_out
+              else f"{RED}[!] Missing --host{END}")
+        sys.exit(1)
 
-    if args.host[0:7] != "http://" and args.host[0:8] != "https://":
-        args.host = f"http://{args.host}"
+    detector = CMSDetector(
+        host=host,
+        raw=args.raw,
+        json_out=args.json_out,
+        insecure=args.insecure,
+        timeout=args.timeout,
+        user_agent=args.user_agent
+    )
+    detector.scan()
 
-    args.host = args.host.rstrip("/").strip()
 
-    CMSDetector(args.host, args.raw)
+if __name__ == "__main__":
+    main()
