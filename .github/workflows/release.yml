@@ -1,0 +1,139 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build ${{ matrix.goos }}-${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux
+          - goos: linux
+            goarch: amd64
+            archive: tar.gz
+          - goos: linux
+            goarch: arm64
+            archive: tar.gz
+          - goos: linux
+            goarch: 386
+            archive: tar.gz
+          - goos: linux
+            goarch: arm
+            goarm: "7"
+            archive: tar.gz
+
+          # Windows
+          - goos: windows
+            goarch: amd64
+            archive: zip
+            ext: .exe
+          - goos: windows
+            goarch: arm64
+            archive: zip
+            ext: .exe
+            
+          # macOS (Darwin)
+          - goos: darwin
+            goarch: amd64
+            archive: tar.gz
+          - goos: darwin
+            goarch: arm64
+            archive: tar.gz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: Build
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          GOARM: ${{ matrix.goarm }}
+          EXT: ${{ matrix.ext }}
+          ARCHIVE: ${{ matrix.archive }}
+        run: |
+          set -euxo pipefail
+
+          APP_NAME=cmsdetector
+          VERSION="${GITHUB_REF_NAME:-dev}"
+
+          # Build (static)
+          CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o "${APP_NAME}${EXT}" ./cms_detector.go
+
+          # Package dir
+          PKG="${APP_NAME}_${VERSION}_${GOOS}_${GOARCH}"
+          mkdir -p "${PKG}"
+          mv "${APP_NAME}${EXT}" "${PKG}/"
+          # Include runtime data & docs if present
+          [ -f fingerprints.json ] && cp fingerprints.json "${PKG}/"
+          [ -f README.md ] && cp README.md "${PKG}/"
+          [ -f LICENSE ] && cp LICENSE "${PKG}/"
+
+          mkdir -p dist
+          if [ "${ARCHIVE}" = "zip" ]; then
+            (cd "${PKG}" && zip -r "../dist/${PKG}.zip" .)
+          else
+            tar -czf "dist/${PKG}.tar.gz" "${PKG}"
+          fi
+
+          # Checksums per job (aggregated later)
+          (cd dist && for f in *; do sha256sum "$f" >> "SHA256SUMS-${GOOS}-${GOARCH}.txt"; done)
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+
+  release:
+    name: publish
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+
+      - name: Aggregate checksums
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd dist
+          cat SHA256SUMS-*.txt > SHA256SUMS.txt
+          rm -f SHA256SUMS-*.txt
+          sort -o SHA256SUMS.txt SHA256SUMS.txt
+
+      - name: Create GitHub Release & upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: |
+            Automated release for ${{ github.ref_name }}.
+            Includes builds for linux, windows, and macOS (amd64/arm64 + extras).
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/SHA256SUMS.txt
