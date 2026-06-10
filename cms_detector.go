@@ -308,12 +308,13 @@ func match(prepared []preparedCMS, resp *http.Response, bodyLower string) []matc
 
 func main() {
 	var (
-		host     string
-		raw      bool
-		jsonMode bool
-		timeout  int
-		insecure bool
-		ua       string
+		host       string
+		raw        bool
+		jsonMode   bool
+		timeout    int
+		insecure   bool
+		ua         string
+		noRedirect bool
 	)
 	flag.StringVar(&host, "host", "", "Host or URL to scan (e.g., example.com or https://example.com)")
 	flag.BoolVar(&raw, "raw", false, "Print only result name(s) in lowercase with underscores; print 'null' on no match.")
@@ -321,6 +322,7 @@ func main() {
 	flag.IntVar(&timeout, "timeout", 10, "HTTP timeout in seconds (default: 10).")
 	flag.BoolVar(&insecure, "insecure", false, "Skip TLS verification (verify=false).")
 	flag.StringVar(&ua, "ua", "", "Custom User-Agent string.")
+	flag.BoolVar(&noRedirect, "no-redirect", false, "Do not follow HTTP redirects.")
 	flag.Parse()
 
 	if host == "" && !(jsonMode || raw) {
@@ -362,9 +364,15 @@ func main() {
 	}
 	// track redirects
 	redirects := 0
-	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		redirects = len(via)
-		return nil
+	if noRedirect {
+		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
+	} else {
+		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			redirects = len(via)
+			return nil
+		}
 	}
 
 	req, err := http.NewRequest("GET", host, nil)
