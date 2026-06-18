@@ -170,6 +170,7 @@ Output:
 - [x] [Adobe Muse](https://www.adobe.com/wam/muse.html)
 
 ## 🔍 Fingerprint Types
+- `html` → Match a CSS selector against the parsed DOM (recommended for HTML — no false positives from page text)
 - `regex` → Match regex in HTML
 - `string_contains` → HTML contains substring
 - `strings_contain` → HTML contains all substrings (pipe-separated)
@@ -181,3 +182,37 @@ Output:
 - `cookie_key_value_contains` → Cookie value contains substring
 - `cookie_key_value_b64_json_keys` → Decode cookie from Base64 → JSON → check for keys
 - `cookie_substr_key_value_b64_type` → Check cookie name suffix, decode Base64, verify value type
+
+### `html` — DOM/CSS selector matching
+Unlike `string_contains`, the `html` type parses the response into a real DOM and runs a
+CSS selector (powered by [cascadia](https://github.com/andybalholm/cascadia)). It only
+matches actual elements/attributes, so a blog that merely *mentions* `/wp-content/` in its
+text is **not** a false positive — the path has to live in a real `<link href>`/`<script src>`.
+
+Supported selector features: tag/class/id, descendant & child combinators, selector groups
+(`a, b`), and attribute matchers `[attr]`, `[attr=val]`, `[attr*=val]` (contains),
+`[attr^=val]` (prefix), `[attr$=val]` (suffix).
+
+```go
+// WordPress (fingerprints/fingerprints.go)
+{Type: `html`, Value: `meta[name="generator"][content*="WordPress"]`},
+{Type: `html`, Value: `link[href*="/wp-content/"], script[src*="/wp-content/"]`},
+```
+
+## ➕ Adding your own detection
+Detections are plain Go data in [`fingerprints/fingerprints.go`](fingerprints/fingerprints.go).
+Add a `CMS` entry to the `All` slice — no engine changes needed:
+
+```go
+{
+    Name: `My CMS`,
+    Fingerprints: []Fingerprint{
+        {Type: `html`, Value: `meta[name="generator"][content*="My CMS"]`},
+        {Type: `header_key_value_contains`, Key: `X-Powered-By`, Value: `MyCMS`},
+    },
+},
+```
+
+A CMS is reported if **any** of its fingerprints match. Invalid regex/CSS selectors are
+skipped at startup rather than crashing, so a typo in one fingerprint won't break the rest.
+PRs with new detections are welcome.

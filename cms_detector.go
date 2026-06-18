@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
@@ -16,7 +17,9 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/andybalholm/cascadia"
 	"github.com/joshuavanderpoll/CMS-Detector/fingerprints"
+	"golang.org/x/net/html"
 )
 
 const (
@@ -38,6 +41,7 @@ type preparedFP struct {
 	fp    fingerprints.Fingerprint
 	re    *regexp.Regexp // compiled when type == "regex"
 	rawRe string
+	sel   cascadia.Selector // compiled when type == "html"
 }
 
 type preparedCMS struct {
@@ -76,15 +80,22 @@ func prepare(cms []fingerprints.CMS) []preparedCMS {
 	for _, c := range cms {
 		pc := preparedCMS{Name: c.Name}
 		for _, fp := range c.Fingerprints {
-			if fp.Type == "regex" {
-				pat := "(?is)" + fp.Value
-				re, err := regexp.Compile(pat)
+			switch fp.Type {
+			case "regex":
+				re, err := regexp.Compile("(?is)" + fp.Value)
 				if err != nil {
 					// skip invalid regex but continue
 					continue
 				}
 				pc.FPs = append(pc.FPs, preparedFP{fp: fp, re: re, rawRe: fp.Value})
-			} else {
+			case "html":
+				sel, err := cascadia.Compile(fp.Value)
+				if err != nil {
+					// skip invalid CSS selector but continue
+					continue
+				}
+				pc.FPs = append(pc.FPs, preparedFP{fp: fp, sel: sel})
+			default:
 				pc.FPs = append(pc.FPs, preparedFP{fp: fp})
 			}
 		}
@@ -165,7 +176,7 @@ func decodeBase64Any(s string) ([]byte, error) {
 	return nil, fmt.Errorf("base64 decode failed")
 }
 
-func match(prepared []preparedCMS, resp *http.Response, bodyLower string) []matchResult {
+func match(prepared []preparedCMS, resp *http.Response, bodyLower string, doc *html.Node) []matchResult {
 	results := []matchResult{}
 	h := resp.Header
 	cookies := resp.Cookies()
@@ -179,6 +190,11 @@ func match(prepared []preparedCMS, resp *http.Response, bodyLower string) []matc
 			case "regex":
 				if pf.re != nil && pf.re.FindStringIndex(bodyLower) != nil {
 					matchedBy = append(matchedBy, "regex:"+pf.rawRe)
+				}
+
+			case "html":
+				if pf.sel != nil && doc != nil && cascadia.Query(doc, pf.sel) != nil {
+					matchedBy = append(matchedBy, "html:"+fp.Value)
 				}
 
 			case "string_contains":
@@ -419,7 +435,10 @@ func main() {
 	bodyLower := strings.ToLower(strings.ReplaceAll(string(b), "'", "\""))
 	bodyLower = strings.TrimSpace(bodyLower)
 
-	matches := match(prepared, resp, bodyLower)
+	// parse raw body into a DOM for structural (html) fingerprints; nil on failure
+	doc, _ := html.Parse(bytes.NewReader(b))
+
+	matches := match(prepared, resp, bodyLower, doc)
 	detected := len(matches) > 0
 
 	if jsonMode {
