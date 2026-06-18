@@ -31,6 +31,9 @@ const (
 	END      = "\033[0m"
 )
 
+// Max response body read into memory.
+const maxBodyBytes = 5 << 20 // 5 MiB
+
 type preparedFP struct {
 	fp    fingerprints.Fingerprint
 	re    *regexp.Regexp // compiled when type == "regex"
@@ -132,7 +135,10 @@ func cookieContains(cookies []*http.Cookie, name, sub string) bool {
 }
 
 func decodeBase64Any(s string) ([]byte, error) {
-	u, _ := url.QueryUnescape(s)
+	u, err := url.QueryUnescape(s)
+	if err != nil {
+		u = s
+	}
 
 	// try StdEncoding with padding fix
 	normalize := func(x string) string {
@@ -222,15 +228,8 @@ func match(prepared []preparedCMS, resp *http.Response, bodyLower string) []matc
 
 			case "cookie_key_value":
 				name := fp.Key
-				val := strings.ToLower(fp.Value)
-				if name != "" && cookieEquals(cookies, name, val) { // case-insensitive equality
+				if name != "" && cookieEquals(cookies, name, fp.Value) {
 					matchedBy = append(matchedBy, fmt.Sprintf("cookie_key_value:%s=%s", name, fp.Value))
-				} else {
-					// equality with case-sensitive value (fallback)
-					c := cookiesByName(cookies, name)
-					if c != nil && c.Value == fp.Value {
-						matchedBy = append(matchedBy, fmt.Sprintf("cookie_key_value:%s=%s", name, fp.Value))
-					}
 				}
 
 			case "cookie_key_value_contains":
@@ -304,6 +303,17 @@ func match(prepared []preparedCMS, resp *http.Response, bodyLower string) []matc
 		}
 	}
 	return results
+}
+
+// First 3 reasons + "(+N more)". Does not mutate input.
+func trimReasons(matchedBy []string) []string {
+	if len(matchedBy) <= 3 {
+		return matchedBy
+	}
+	trimmed := make([]string, 0, 4)
+	trimmed = append(trimmed, matchedBy[:3]...)
+	trimmed = append(trimmed, fmt.Sprintf("(+%d more)", len(matchedBy)-3))
+	return trimmed
 }
 
 func main() {
@@ -400,7 +410,10 @@ func main() {
 		printErrAndExit(host, err, jsonMode)
 	}
 	defer resp.Body.Close()
-	b, _ := io.ReadAll(resp.Body)
+	b, err := io.ReadAll(io.LimitReader(resp.Body, maxBodyBytes))
+	if err != nil {
+		printErrAndExit(host, err, jsonMode)
+	}
 
 	// match on lowercased, ' -> " replaced, trimmed
 	bodyLower := strings.ToLower(strings.ReplaceAll(string(b), "'", "\""))
@@ -437,10 +450,7 @@ func main() {
 			}
 			fmt.Printf(GREEN+"[√] \"%s\" is using "+BLUE+"%s"+GREEN+"!"+END+"\n", host, strings.Join(names, ", "))
 			for _, m := range matches {
-				reasons := m.MatchedBy
-				if len(reasons) > 3 {
-					reasons = append(reasons[:3], fmt.Sprintf("(+%d more)", len(m.MatchedBy)-3))
-				}
+				reasons := trimReasons(m.MatchedBy)
 				fmt.Println(CYAN + "    ↳ matched by: " + strings.Join(reasons, "; ") + END)
 			}
 		} else {

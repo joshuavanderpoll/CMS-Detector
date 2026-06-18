@@ -226,7 +226,7 @@ var All = []CMS{
 		},
 	},
 	{
-		Name: `Netifly`,
+		Name: `Netlify`,
 		Fingerprints: []Fingerprint{
 			{Type: `header_key_value_contains`, Value: `Netlify`, Key: `Server`},
 		},
@@ -267,7 +267,7 @@ var All = []CMS{
 	{
 		Name: `Ghost`,
 		Fingerprints: []Fingerprint{
-			{Type: `regex`, Value: `<meta name="generator" content="Ghost ?([0-9]+\.[0-9]+.*?)"\s*\/?>(?i)`},
+			{Type: `regex`, Value: `<meta name="generator" content="Ghost ?([0-9]+\.[0-9]+.*?)"\s*\/?>`},
 			{Type: `string_contains`, Value: `/ghost/api/`},
 			{Type: `string_contains`, Value: `<script src="/public/ghost-sdk`},
 		},

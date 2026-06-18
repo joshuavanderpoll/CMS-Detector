@@ -14,7 +14,7 @@ A lightweight fast Go script to detect which **CMS or framework** a given websit
 - Works with both http:// and https:// targets.
 
 ## 📦 Installation
-> Prereq: Go 1.24+ (for go install). For prebuilt binaries from Releases, no Go toolchain is required.
+> Prereq: Go 1.21+ (for go install). For prebuilt binaries from Releases, no Go toolchain is required.
 
 ### 1) Install from GitHub Releases (recommended)
 Download a prebuilt binary for your OS/arch from the Releases page and put it on your PATH.
@@ -59,7 +59,7 @@ git clone https://github.com/joshuavanderpoll/CMS-Detector.git
 cd CMS-Detector
 
 # Build the Go binary
-go build -o cms_detector ./cms_detector.go
+go build -o cms_detector .
 ```
 
 ## 🚀 Usage
@@ -107,6 +107,7 @@ Output:
 | `--timeout`  | Set request timeout (default: 10s)                      |
 | `--insecure` | Disable SSL verification (`verify=False`)               |
 | `--ua`       | Custom User-Agent string                                |
+| `--no-redirect` | Do not follow HTTP redirects                         |
 
 ## ✅ Supported CMS / Frameworks
 - [x] [Laravel](https://laravel.com/)
@@ -137,7 +138,7 @@ Output:
 - [x] [TYPO3](https://typo3.org/)
 - [x] [Blox](https://bloxcms.com/)
 - [x] [Odoo](https://www.odoo.com/)
-- [x] [Netifly](https://www.netlify.com/)
+- [x] [Netlify](https://www.netlify.com/)
 - [x] [Amazon S3 (Static Website)](https://aws.amazon.com/)
 - [x] [Vercel](https://vercel.com/solutions/web-apps)
 - [x] [GitHub Pages](https://docs.github.com/en/pages)
